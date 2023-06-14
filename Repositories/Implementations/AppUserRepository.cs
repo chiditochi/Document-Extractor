@@ -12,12 +12,12 @@ public class AppUserRepository : IAppUserRepository<AppUser>
 {
     private readonly AppDbContext _context;
     private readonly UserManager<AppUser> _userManager;
-    private readonly RoleManager<AppUser> _roleManager;
+    private readonly RoleManager<AppRole> _roleManager;
 
     public AppUserRepository(
         AppDbContext context,
         UserManager<AppUser> userManager,
-        RoleManager<AppUser> roleManager
+        RoleManager<AppRole> roleManager
         )
     {
         _context = context;

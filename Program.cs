@@ -44,13 +44,15 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IAppUserRepository<AppUser>, AppUserRepository>();
-builder.Services.AddScoped<IAppRoleRepository<AppRole>, AppRoleRepository>();
+// builder.Services.AddScoped<IAppRoleRepository<AppRole>, AppRoleRepository>();
 builder.Services.AddScoped<IAppConstantRepository, AppConstantRepository>();
 
 //add Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IExtractorService, ExtractorService>();
 builder.Services.AddScoped<IHelperService, HelperService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 
 
