@@ -1,0 +1,38 @@
+{
+    "UserTypes": [
+        "OpTeam",
+        "Patient"
+    ],
+    "Roles": [
+        "Admin",
+        "User"
+    ],
+    "Users": [ {
+            "FirstName": "System",
+            "LastName": "Admin",
+            "Password": "Admin@.1234",
+            "Gender": "Female",
+            "UserType": "OpTeam",
+            "Email": "admin.de@gmail.com",
+            "Role": "Admin"
+        },
+        {
+            "FirstName": "Deby",
+            "LastName": "Pacman",
+            "Password": "DEUser@2023",
+            "Gender": "Female",
+            "UserType": "Patient",
+            "Email": "dpacman@gmail.com",
+            "Role": "User"
+        }
+    ],
+    "Teams": [
+        { "Code": "tm247", "Description": "AMH City Carers Support Service"},
+        { "Code": "tm314", "Description": "AMH Bipolar Service"},
+        { "Code": "tm361", "Description": "AMH LMHT Mansfield"}
+    ],
+    "AppConstant": [
+        {"Label": "RequiredProps", "LabelValues":  ["PatientNHS", "PatientDOB", "PatientFirstname", "PatientSurname"]},
+        {"Label": "UploadExistProps", "LabelValues":  ["DateTime", "PatientNHS"]}
+    ]
+}
