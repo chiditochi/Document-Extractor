@@ -19,7 +19,7 @@ namespace Document_Extractor.Models.DB
 
         }
 
-        public long UserTypeId { get; set; }
+        public long? UserTypeId { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Gender { get; set; }

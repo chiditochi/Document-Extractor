@@ -11,7 +11,7 @@ namespace Document_Extractor.Models.DB
             UpdatedAt = DateTime.Now;
 
         }
-        public long UserTypeId { get; set; }
+        public long? UserTypeId { get; set; }
         public string Label { get; set; } //can be used to modify display
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

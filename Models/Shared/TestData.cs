@@ -4,11 +4,17 @@ namespace Document_Extractor.Models.Shared;
 public class TestData
 {
     public string[]? UserTypes { get; set; }
-    public string[]? Roles { get; set; }
+    public TestRole[]? Roles { get; set; }
     public TestUser[]? Users { get; set; }
     public TestTeam[]? Teams { get; set; }
     public TestAppConstant[]? AppConstant { get; set; }
 
+}
+
+public class TestRole
+{
+    public string? Name { get; set; }
+    public string? UserType { get; set; }
 }
 
 public class TestUser

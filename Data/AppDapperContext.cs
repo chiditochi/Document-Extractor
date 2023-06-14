@@ -11,7 +11,7 @@ public class AppDapperContext
     public AppDapperContext(IConfiguration configuration)
     {
         _configuration = configuration;
-        _connectionString = _configuration.GetConnectionString("ApiConnectionString");
+        _connectionString = _configuration.GetConnectionString("AppConnectionString");
     }
 
     public IDbConnection CreateConnection()

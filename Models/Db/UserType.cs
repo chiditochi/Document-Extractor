@@ -4,7 +4,6 @@ namespace Document_Extractor.Models.DB
     {
         public UserType()
         {
-            Label = string.Empty;
             CreatedAt = DateTime.Now;
             UpdatedAt = DateTime.Now;
         }

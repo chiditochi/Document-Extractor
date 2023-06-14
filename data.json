@@ -1,11 +1,8 @@
 {
-    "UserTypes": [
-        "OpTeam",
-        "Patient"
-    ],
+    "UserTypes": ["OpTeam","Patient"],
     "Roles": [
-        "Admin",
-        "User"
+        {"Name": "Admin", "UserType": "OpTeam"},
+        {"Name": "User", "UserType": "Patient"}
     ],
     "Users": [ {
             "FirstName": "System",

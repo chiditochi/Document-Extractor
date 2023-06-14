@@ -27,8 +27,9 @@ builder.Services.AddIdentity<AppUser, AppRole>(config =>
                 .AddDefaultTokenProviders();
 //AppDB service
 var timeout = Convert.ToInt32(builder.Configuration.GetSection("App:DBTimeOutInMinutes").Value);
+
 builder.Services.AddDbContextPool<AppDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetSection("ApiConnectionString").Value,
+        options.UseSqlServer(builder.Configuration.GetConnectionString("AppConnectionString"),
         opts => opts.CommandTimeout(timeout)
  ));
 
@@ -57,6 +58,12 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 
 
 var app = builder.Build();
+
+//initialize the db
+var scope = app.Services.CreateScope();
+await DbInitializer.Initialize(scope);
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
