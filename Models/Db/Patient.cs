@@ -42,8 +42,9 @@ namespace Document_Extractor.Models.DB
 
         public long TeamId { get; set; }
         public bool IsUploadComfirmed { get; set; }
-        public string? FileName1 { get; set; }
-        public string? FileName2 { get; set; }
+        public bool Status { get; set; }
+        public string? FileName { get; set; }
+        public string? TxtFileName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 

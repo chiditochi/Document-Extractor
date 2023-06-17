@@ -5,5 +5,5 @@ namespace Document_Extractor.Services.Interfaces;
 
 public interface IExtractor
 {
-    public Task<AppResult<string>> ReadFile(string filePath);
+    public Task<AppResult<string>> ReadFile(string filePath, string targetFilePath);
 }

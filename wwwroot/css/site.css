@@ -20,3 +20,67 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.app-dialog {
+  /* margin-top: 12rem; */
+  max-width: 70ch;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 0;
+  /* border-radius: 1em; */
+  /* border: 1;
+  border-color: rgba(255, 165, 0, .8); */
+  /* box-shadow: 2px 2px 2px 1px cyan; */
+  box-shadow: 0 0 1em .1em rgba(0,128,0,.5);
+  /* z-index: 100; */
+
+}
+
+.app-dialog::backdrop, .page-loader::backdrop{
+  background-color: rgba(0,0,0,0.3);
+  background-image: url("/images/feather_1280.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
+}
+
+.spinner {
+  border: 16px solid silver;
+  border-top: 16px solid #fc3b3b;
+  border-radius: 50%;
+  width: 15rem;
+  height: 15rem;
+  animation: spin 700ms linear infinite;
+
+  display: grid;
+  justify-items: center;
+  align-items: center;
+
+  position: absolute;
+  z-index: 1001;
+}
+.spinner-layout {
+  z-index: 1000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #d8dbde;
+
+  display: grid;
+  justify-items: center;
+  align-items: center;
+
+  overflow: hidden;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

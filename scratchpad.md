@@ -5,6 +5,22 @@ dotnet tool install --global dotnet-ef
 - dotnet-ef database update
 
 
+###  libman
+dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+libman --version
+libman init
+
+libman install <LIBRARY> [-d|--destination] [--files] [-p|--provider] [--verbosity]
+    e.g libman install jquery@3.2.1 --provider cdnjs --destination wwwroot/scripts/jquery --files jquery.min.js
+    e.g libman install toastr.js@2.1.4 --provider cdnjs --destination wwwroot/lib/toastr --files toastr.min.js --files toastr.min.css
+        libman install C:\temp\contosoCalendar\ --provider filesystem --files calendar.js --files calendar.css
+
+libman clean
+libman restore
+libman uninstall <LIBRARY> [--verbosity]
+
+-- cdnjs repository
+
 ## ef migrations
 
 - dotnet ef migrations add InitialCreate
@@ -17,15 +33,13 @@ dotnet tool install --global dotnet-ef
   - dotnet ef migrations script AddNewTables AddAuditTable
 
 ### Todos 
-    - run ef migrations to create db and tables 
-    - write seeding method to create needed entities 
-    - configure upload folders 
-    - create upload view and test 
-    - create confirmation view and test 
+    - authorization
+    - authentication
+    - login 
+    - logout
 
 
 ## db init 
-
     - create UserTypes 
         - OpTeam 
         - Patient 
@@ -87,3 +101,95 @@ We need to check if a user has previously loaded a file so they dont load the ex
 That should do, so if any of the same document gets uploaded it will throw an error
 
 8. Finally, the contents from the txt file needs to be saved in the DB.
+
+
+### 
+  -- truncate table dbo.Patients;
+  -- DBCC CHECKIDENT('Patients', RESEED, 1);
+
+---------------------------------------------
+
+DateTime
+OperatorFirstname
+OperatorMiddle 
+OperatorSurname 
+PatientNHS
+PatientTitle
+PatientFirstname
+PatientMiddle
+PatientSurname
+PatientDOB
+PatientSex
+PatientSexCode
+PatientHousename
+PatientAddress1
+PatientAddress2 
+PatientAddress3
+PatientAddress4 
+PatientPostcode
+PatientPhoneno
+PatientReligion
+PatientEthnicity 
+PatientPractice 
+PatientPracticeAddress 
+PatientPracticeCode
+PatientGPTitle 
+PatientGPFirstName
+PatientGPSurname
+PatientGPCode
+
+
+           function getDummyData(){
+                return {
+                    dateTime: "15/09/2022 16:13",
+                    operatorFirstname: "Ahmed", 
+                    operatorMiddle:  "",
+                    operatorSurname: "Yousafzai", 
+                    patientNHS: "999 006 9034", 
+                    patientTitle: "Mrs", 
+                    patientFirstname: "Ebs-Donotuse", 
+                    patientMiddle:  "",
+                    patientSurname: "Xxtestpatientaado",
+                    patientDOB: "01 May 1944", 
+                    patientSex: "Female",
+                    patientSexCode: "F",
+                    patientHousename: "Co Npfit Test Data Manager",
+                    patientAddress1: "Princes Exchange", 
+                    patientAddress2:  "",
+                    patientAddress3: "Princes Square", 
+                    patientAddress4:  "",
+                    patientPostcode: "LS1 4HY", 
+                    patientPhoneno: "07706 257457", 
+                    patientReligion: "Religious affiliation", 
+                    patientEthnicity: "White:Eng/Welsh/Scot/NI/Brit - England and Wales 2011 census", 
+                    patientPractice: "The Gamston Medical Centre", 
+                    patientPracticeAddress: "The Gamston Medical Centre, Gamston District Centre, Gamston, Nottingham NG2 6PS", 
+                    patientPracticeCode: "C84703",  
+                    patientGPTitle: "Dr", 
+                    patientGPFirstName: "Linda", 
+                    patientGPSurname: "Kandola", 
+                    patientGPCode: "G9313091"
+                }
+            }
+
+            async function getDummyData2(){
+                let result = null;
+                var options = appJS.makeApiCallDefaultOption();
+
+                await appJS.setSpinnerPromise(true);
+                var res = await appJS.makeApiCall(`/Patient/1`, options);
+
+                appJS.setSpinnerPromise(false, 5000);
+               //console.log({ result: res.data });
+                if(res.data.status){
+
+                    result = res.data.data[0];
+                    console.log({ id: result.patientId });
+                    $('.confirm').data("id", result.patientId);
+                    $('.reject').data("id", result.patientId); 
+
+                }
+                else appJS.displayError({ message: res.data.message, title: messageLabel });
+
+                return result; 
+            }

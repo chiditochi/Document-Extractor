@@ -8,7 +8,7 @@ using Spire.Doc;
 namespace Document_Extractor.Services.Implementation;
 public class WordExtractor : IExtractor
 {
-    public async Task<AppResult<string>> ReadFile(string filePath)
+    public async Task<AppResult<string>> ReadFile(string filePath, string targetFilePath)
     {
         var result = new AppResult<string>();
 
@@ -19,10 +19,7 @@ public class WordExtractor : IExtractor
             //Load a Word file
             var f = filePath.Split(Path.DirectorySeparatorChar).Last();
             var fileName = f.Split(".").First();
-            var storageFile = Path.Combine(Environment.CurrentDirectory, "Result", fileName + ".txt");
-            //StorageName = storageFile;
-
-            //IFormFile file = (IFormFile)File.OpenRead(storageFile);
+            var storageFile = Path.Combine(targetFilePath, fileName + ".txt");
 
             doc.LoadFromFile(filePath);
 

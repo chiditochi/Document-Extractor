@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using AutoMapper;
 using Document_Extractor.Models.DB;
@@ -21,6 +22,7 @@ public class ExtractorService : IExtractorService
     private readonly ITeamRepository _teamRepository;
     private readonly IPatientRepository _patientRepository;
     private readonly IMapper _mapper;
+    private readonly IWebHostEnvironment _wenv;
 
     public ExtractorService(
         ILogger<ExtractorService> logger,
@@ -29,7 +31,8 @@ public class ExtractorService : IExtractorService
         IAppConstantRepository appConstantRepository,
         ITeamRepository teamRepository,
         IPatientRepository patientRepository,
-        IMapper mapper
+        IMapper mapper,
+        IWebHostEnvironment wenv
     )
     {
         _logger = logger;
@@ -39,6 +42,7 @@ public class ExtractorService : IExtractorService
         _teamRepository = teamRepository;
         _patientRepository = patientRepository;
         _mapper = mapper;
+        _wenv = wenv;
 
 
     }
@@ -109,9 +113,10 @@ public class ExtractorService : IExtractorService
         patient.CreatedAt = DateTime.Now;
         patient.UpdatedAt = DateTime.Now;
         patient.TeamId = teamId;
-        patient.FileName1 = filePath;
-        patient.FileName2 = textPath;
+        patient.FileName = filePath;
+        patient.TxtFileName = textPath;
         patient.IsUploadComfirmed = false;
+        patient.Status = false;
 
         var dbPatient = await _patientRepository.Create(patient);
         if (dbPatient == null) throw new Exception($"Error creating Patient");
@@ -130,9 +135,10 @@ public class ExtractorService : IExtractorService
         var result = new AppResult<string>();
         try
         {
-            var storageLocation = _config.GetSection("App:UploadLocation").Value;
-            if (!string.IsNullOrEmpty(storageLocation)) throw new Exception($"No Upload Location configured!");
-            var fileNameWithPath = Path.Combine(storageLocation, DateTimeOffset.Now.ToUnixTimeSeconds() + "_" + doc);
+            var storageLocation = _config.GetSection("App:Uploads:UserUploads").Value;
+            storageLocation = string.Join(Path.DirectorySeparatorChar, storageLocation.Split("/"));
+            if (string.IsNullOrEmpty(storageLocation)) throw new Exception($"No Upload Location configured!");
+            var fileNameWithPath = Path.Combine(_wenv.WebRootPath, storageLocation, DateTimeOffset.Now.ToUnixTimeSeconds() + "_" + doc.FileName);
             using (var stream = new FileStream(fileNameWithPath, FileMode.Create))
             {
                 doc.CopyTo(stream);
@@ -157,9 +163,14 @@ public class ExtractorService : IExtractorService
         {
             ExtractResult r = new ExtractResult();
             IExtractor? extractor = GetExtractorFactory(filePath);
-            if (extractor != null) throw new Exception($"Error fetching Extractor instance");
+            if (extractor == null) throw new Exception($"Error fetching Extractor instance");
 
-            var extractFileResult = await extractor!.ReadFile(filePath);
+            var targetFilePath = _config.GetSection("App:Uploads:txtUploads").Value;
+            targetFilePath = string.Join(Path.DirectorySeparatorChar, targetFilePath.Split("/"));
+            if (string.IsNullOrEmpty(targetFilePath)) throw new Exception();
+
+            targetFilePath = Path.Combine(_wenv.WebRootPath, targetFilePath);
+            var extractFileResult = await extractor!.ReadFile(filePath, targetFilePath);
             if (!extractFileResult.Status) throw new Exception(extractFileResult.Message);
 
             r.StorageName = extractFileResult.Data.First();
@@ -179,8 +190,8 @@ public class ExtractorService : IExtractorService
     {
         IExtractor result = null;
         var ext = Path.GetExtension(filePath);
-        if (ext == "docx") result = new WordExtractor();
-        if (ext == "pdf") result = new PdfExtractor();
+        if (ext == ".docx") result = new WordExtractor();
+        if (ext == ".pdf") result = new PdfExtractor();
 
         return result;
     }
@@ -371,7 +382,7 @@ public class ExtractorService : IExtractorService
         {
             PropertyInfo propItem = type.GetProperty(prop)!;
             var propValue = propItem.GetValue(model, null);
-            if (propValue != null || !string.IsNullOrEmpty(propValue?.ToString())) missingList.Add(prop);
+            if (propValue == null || string.IsNullOrEmpty(propValue?.ToString())) missingList.Add(prop);
         }
 
         if (missingList.Count > 0) throw new Exception(string.Join(", ", missingList));
@@ -409,7 +420,7 @@ public class ExtractorService : IExtractorService
 
             var uploadExistResult = await _patientRepository.DoesUploadExist(modelPropsDict, propsAndFormat);
             if (!uploadExistResult.Status) throw new Exception(uploadExistResult.Message);
-            if (uploadExistResult.Data.First()) throw new Exception($"Upload exists");
+            if (uploadExistResult.Data.First()) throw new Exception($"Data Upload exists");
 
         }
     }

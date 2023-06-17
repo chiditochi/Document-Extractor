@@ -2,7 +2,221 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+
+<div class="container min-vh-100">
+    <div class="row">
+        <div class="row text-center">
+            <div class="col-12 display-6 my-3">Upload Form</div>
+            <form role="form" class="form offset-md-3 col-12 col-md-6">
+                <div class="form-group ">
+                    <select class="form-control team">
+                    </select>
+                </div>
+                <div class="my-3 form-group">
+                    <input type="file" class="form-control doc">
+                </div>
+                <div class="text-start">
+                    <button class="btn btn-warning w-25 send">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <dialog class="app-dialog row w-100">
+        <div class="row">
+            <div class="row justify-content-md-center gap-3">
+                <button class="bg-danger btn btn-danger w-25 reject">Reject</button>
+                <button class="btn btn-success w-25 confirm">Confirm</button>
+            </div>
+            <div class="col-12 payload">
+
+            </div>
+
+        </div>
+    </dialog>
 </div>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(async function () {
+            /*
+                1. onload page, fetch team list
+                2. populate select
+                3. on submit
+                    - validate inputs
+                    - make api call 
+                        - set spinner 
+                        process result 
+                        - remove spinner
+            */
+
+            /* Declarations */
+            let messageLabel = "";
+            const datetimeVars = ["dateTime", "patientDOB"];
+
+            const teamSelect = $(".team");
+            const docFile = $(".doc");
+            const sendBtn = $(".send");
+
+            let rejectBtn = $(".reject");
+            let confirmBtn = $(".confirm");
+
+
+            /* Actions */
+            await autoLoad();
+
+            rejectBtn.click(async function(){
+                var id = $(this).data("id");
+                await UploadConfirmation(id, false);
+            });
+
+            confirmBtn.click(async function(){
+                var id = $(this).data("id");
+                await UploadConfirmation(id, true);
+            });
+
+
+            /* implementations */
+
+              async function autoLoad(){
+                messageLabel = "Loading Teams";
+
+                var options = appJS.makeApiCallDefaultOption();
+                await appJS.setSpinnerPromise(true);
+                var res = await appJS.makeApiCall(`/Teams`, options);
+
+                appJS.setSpinnerPromise(false, 1000);
+                if(res.data.status){
+                    //console.log({ d: res.data.data[0] });
+                    const dataChoices = res.data.data.map(item =>({ label: item.codeDescription, labelValue: item.teamId.toString()}) ) ;
+                    const selector = ".team";
+                    const defaultOption = "Select a Team"; 
+                    $(selector).empty();                   
+                    appJS.populateSelect(dataChoices, selector, defaultOption);
+                    //await populateDialog();
+                    $(".app-dialog")[0].close();
+                    $(".app-dialog").hide();
+                }
+                else appJS.displayError({ message: res.data.message, title: messageLabel }); 
+
+            }
+
+
+            sendBtn.click(async function(evt){
+                messageLabel = "Document Upload";
+
+                evt.preventDefault();
+
+                var formData = getFormData();
+                appJS.printFormData(formData);
+                var options = appJS.makeApiCallDefaultOption();
+        
+                options.method = "POST";
+                options.headers = {};
+                options.body = formData;
+
+
+                await appJS.setSpinnerPromise(true);
+                var res = await appJS.makeApiCall(`/UploadPost`, options);
+
+                appJS.setSpinnerPromise(false, 5000);
+                if(res.data.status){
+                    //console.log({ d: res.data.data[0] });
+                    //appJS.displaySuccess({ message: res.data.message, title: messageLabel });
+                    appJS.resetForm('.form');
+                    const patientData = res.data.data[0];
+                    await populateDialog(patientData)
+                }
+                else appJS.displayError({ message: res.data.message, title: messageLabel }); 
+               
+            });
+
+            function getFormData(){
+                var result = new FormData();
+
+                var doc = docFile[0].files[0];
+                var teamId = teamSelect.children("option:selected").val();
+
+                result.append('doc', doc);
+                result.append('teamId', teamId);
+
+                return result;
+
+            }
+
+            async function populateDialog(data){
+                //var data = getDummyData();
+                //var data = await getDummyData2();
+                //patientId = data.patientId;
+                var txtKeys = Object.keys(data);
+
+                var dataHtml = txtKeys.map(key =>{
+                    var obj = {};
+                    obj[key] = data[key];
+                    let t = "";
+
+                    let viewKey = formatKey(key);
+                    let excludes = ["createdAt", "updatedAt"];
+
+                    if(data[key] && excludes.indexOf(key) === -1 && data[key].length > 0){
+                        t = `<div class="row my-2">
+                            <div class="col-6 border py-2 bg-light">${viewKey}</div>
+                            <div class="col-6 border py-2">${data[key]}</div> 
+                            </div>
+                            `;
+                    }
+                    return t;
+                });
+
+                $('.payload').html(dataHtml);
+                $(".app-dialog").show();
+                $(".app-dialog")[0].showModal();
+
+                $('.confirm').data("id", data.patientId);
+                $('.reject').data("id", data.patientId); 
+
+            }
+
+            function formatKey(key){
+                let viewKey = key.replace(/([A-Z])/, ' $1').replace(/^./, function(str){ return str.toUpperCase(); });
+                if(viewKey.includes("GP") || viewKey.includes("Practice")){
+                    viewKey = viewKey.replace(/(GP|Practice)/, '$1 ');
+                }
+                return viewKey;
+
+            }
+
+
+            async function UploadConfirmation(patientId, status){
+                messageLabel = "Upload Confirmation";
+                var options = appJS.makeApiCallDefaultOption();
+                options.method = "POST";
+                options.body = JSON.stringify({ patientId, status });
+
+                await appJS.setSpinnerPromise(true);
+                var res = await appJS.makeApiCall(`/Upload/Confirmation`, options);
+
+               appJS.setSpinnerPromise(false, 5000);
+               $('.app-dialog').attr("open", false);
+               $('.app-dialog').hide();
+
+                if(res.data.status){
+                    appJS.displaySuccess({ message: res.data.message, title: messageLabel });
+                    setTimeout(function(){
+                        location.reload();
+                    }, 1000)
+                    //await autoLoad();
+                }
+                else appJS.displayError({ message: res.data.message, title: messageLabel });
+
+            }
+          
+
+
+
+
+        });
+    </script>
+}

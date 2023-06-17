@@ -29,5 +29,11 @@
     <PackageReference Include="WitnessValidation.DependencyInjectionExtensions" Version="0.2.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Uploads\" />
+    <Folder Include="wwwroot\Uploads\txtUploads\" />
+    <Folder Include="wwwroot\Uploads\UserUploads\" />
+  </ItemGroup>
+
 
 </Project>

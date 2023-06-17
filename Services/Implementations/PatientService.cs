@@ -37,8 +37,7 @@ public class PatientService : IPatientService
         var result = new AppResult<bool>();
         try
         {
-            //result = await _extractorService.ProcessUpload(formData);
-            var r = await _patientRepository.ConfirmUpload(patientId, status);
+            result = await _patientRepository.ConfirmUpload(patientId, status);
         }
         catch (Exception ex)
         {
@@ -80,7 +79,7 @@ public class PatientService : IPatientService
         try
         {
             var r = await _patientRepository.GetAll();
-            if (r == null || !r.Any()) throw new Exception($"Error fetching Patients");
+            // if (r == null || !r.Any()) throw new Exception($"Error fetching Patients");
 
             if (isUploadComfirmed != null) r = r.Where(x => x.IsUploadComfirmed == isUploadComfirmed.Value).ToList();
             var dtos = _mapper.Map<IEnumerable<PatientDTO>>(r);

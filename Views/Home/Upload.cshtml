@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Uploaded Data Page";
+}
+
+
+
+<div class="container min-vh-100">
+    <div class="row">
+        <div class="row text-center">
+            <div class="col-12 display-6 my-3">Upload Data</div>
+            <div class="row py-3">
+                <table id="upload-table"
+                    class="table table-hover"
+                    width="100%"></table>
+            </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(async function () {
+            /*
+
+            */
+
+            /* Declarations */
+            let messageLabel = "";
+            const datetimeVars = ["dateTime", "patientDOB"];
+
+            const uploadTable = "upload-table";
+
+            /* Actions */
+            await getUploadData();
+
+            /* implementations */
+
+                async function getUploadData(){
+                    messageLabel = "Upload Data";
+
+                    var options = appJS.makeApiCallDefaultOption();
+                    await appJS.setSpinnerPromise(true);
+                    var res = await appJS.makeApiCall(`/UploadData`, options);
+
+                    appJS.setSpinnerPromise(false, 1000);
+                    if(res.data.status){
+                        //console.log({ d: res.data.data[0] });
+                        getUploadHandler(res.data.data);
+                    }
+                    else appJS.displayError({ message: res.data.message, title: messageLabel }); 
+
+                }
+
+                function getUploadHandler(data){
+                    /*
+                        Operator Name 
+                        Patient Name 
+                        Patient NHSNO 
+                        Team Name
+                        CreatedAt 
+
+                        DateTime
+                        OperatorFirstname
+                        OperatorMiddle 
+                        OperatorSurname 
+                        PatientNHS
+                        PatientTitle
+                        PatientFirstname
+                        PatientMiddle
+                        PatientSurname
+
+
+                        PatientDOB
+                        PatientSex
+                        PatientSexCode
+                        PatientHousename
+                        PatientAddress1
+                        PatientAddress2 
+                        PatientAddress3
+                        PatientAddress4 
+                        PatientPostcode
+                        PatientPhoneno
+                        PatientReligion
+                        PatientEthnicity 
+                        PatientPractice 
+                        PatientPracticeAddress 
+                        PatientPracticeCode
+                        PatientGPTitle 
+                        PatientGPFirstName
+                        PatientGPSurname
+                        PatientGPCode
+
+                    */
+                    var tableData = null;
+                    if (data.length > 0) {
+                        tableData = data.map(function (v, index) {
+                            let operator = `${v.operatorSurname}, ${v.operatorFirstname}`;
+                            let patient = `${v.patientTitle} ${v.patientSurname}, ${v.patientFirstname}`;
+                            let patientNHSNO = `${v.patientNHS}`;
+                            let team = `${v.team.codeDescription}`;
+                            let createdAt = `${appJS.getDisplayDate(v.createdAt)}`;
+
+
+                            return [
+                                appJS.formatIndex(++index), 
+                                operator, 
+                                patient, 
+                                patientNHSNO, 
+                                team, 
+                                createdAt
+                            ];
+                        });
+                    }
+
+                    var uploadTableColumnTitles = ["#", "Operator", "Patient", "NHSNO", "Team", "Created At"];
+                    var uploadTableColumn = appJS.getDatatableColumns(uploadTableColumnTitles);
+                    appJS.populateDatatable(uploadTable, uploadTableColumn, tableData, false);
+
+                }
+
+
+
+        });
+    </script>
+}

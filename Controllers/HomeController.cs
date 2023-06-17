@@ -2,19 +2,33 @@
 using Microsoft.AspNetCore.Mvc;
 using Document_Extractor.Models;
 using Document_Extractor.Models.Shared;
+using Document_Extractor.Models.DB;
+using Document_Extractor.Services.Interfaces;
 
 namespace Document_Extractor.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IHelperService _helperService;
+    private readonly IExtractorService _extractorService;
+    private readonly ITeamService _teamService;
+    private readonly IPatientService _patientService;
 
     public HomeController(
-        ILogger<HomeController> logger
+        ILogger<HomeController> logger,
+        IHelperService helperService,
+        IExtractorService extractorService,
+        ITeamService teamService,
+        IPatientService patientService
 
         )
     {
         _logger = logger;
+        _helperService = helperService;
+        _extractorService = extractorService;
+        _teamService = teamService;
+        _patientService = patientService;
     }
 
     public IActionResult Index()
@@ -26,6 +40,7 @@ public class HomeController : Controller
     {
         return View();
     }
+
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
@@ -51,10 +66,37 @@ public class HomeController : Controller
         return View();
     }
 
-    [HttpPost("/Upload")]
-    public IActionResult Upload([FromBody] UploadRequest formData)
+    [HttpGet("/UploadData")]
+    public async Task<IActionResult> UploadData()
     {
-        return View();
+        var result = await _patientService.GetPatients(true);
+        return Json(new { Data = result });
+    }
+
+    
+
+    [HttpPost("/UploadPost")]
+    public async Task<IActionResult> UploadPost([FromForm] UploadRequest formData)
+    {
+        var result = new AppResult<PatientDTO>();
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                List<string> errorList = _helperService.GetModelStateErrors(ModelState);
+                throw new Exception(string.Join(",", errorList));
+            }
+            result = await _extractorService.ProcessUpload(formData);
+
+        }
+        catch (Exception ex)
+        {
+            await _helperService.CustomLogError(ex, "UploadPost");
+            result.Status = false;
+            result.Message = ex.Message;
+        }
+
+        return Json(new { Data = result });
     }
 
 
@@ -64,17 +106,27 @@ public class HomeController : Controller
         return Json(new { });
     }
 
-    [HttpPost("/Patient/Confirm")]
-    public IActionResult PatientConfirm([FromBody] long patientId, [FromBody] bool status)
+    //delete this 
+    [HttpGet("/Patient/{PatientId:long}")]
+    public async Task<IActionResult> GetPatient(long PatientId)
     {
-        return Json(new { });
+        var result = await _patientService.GetPatient(PatientId);
+        return Json(new { Data = result });
+    }
+
+    [HttpPost("/Upload/Confirmation")]
+    public async Task<IActionResult> UploadConfirmation([FromBody] UploadConfirmationRequest payload)
+    {
+        var result = await _patientService.ConfirmUploadedPatient(payload.PatientId, payload.Status);
+        return Json(new { Data = result });
     }
 
 
     [HttpGet("/Teams")]
-    public IActionResult Teams()
+    public async Task<IActionResult> Teams()
     {
-        return Json(new { });
+        var result = await _teamService.GetTeams();
+        return Json(new { Data = result });
     }
 
 

@@ -1,6 +1,7 @@
 
 
 using Document_Extractor.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Document_Extractor.Services.Implementation;
 
@@ -94,6 +95,12 @@ public class HelperService : IHelperService
     }
 
 
+        public List<string> GetModelStateErrors(ModelStateDictionary modelState)
+        {
+            return modelState.Values.SelectMany(v => v.Errors)
+                                        .Select(v => v.ErrorMessage + " " + v.Exception)
+                                        .ToList();
+        }
 
 
 

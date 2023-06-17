@@ -48,7 +48,7 @@ public class PatientRepository : IPatientRepository
 
     public async Task<IEnumerable<Patient>> GetAll()
     {
-        var result = await _context.Patients.ToListAsync();
+        var result = await _context.Patients.Include(x =>x.Team).OrderByDescending(x =>x.CreatedAt).ToListAsync();
         return result;
     }
 
@@ -103,7 +103,11 @@ public class PatientRepository : IPatientRepository
                     var dValue = item.Value;
 
                     var format = propsAndFormat[dKey];
-                    var d = DateTime.ParseExact(dValue, format, CultureInfo.InvariantCulture);
+                    if (dValue.IndexOf("-") > -1 && dKey == SharedConstants.DateTime) format = "yyyy-MM-dd HH:mm";
+                    if (dValue.IndexOf("-") > -1 && dKey == SharedConstants.PatientDOB) format = "yyyy-MM-dd";
+
+                    //var d = DateTime.ParseExact(dValue, format, CultureInfo.InvariantCulture);
+                    var d = DateTime.Parse(dValue);
 
                     if (dKey == SharedConstants.DateTime)
                     {
@@ -149,13 +153,14 @@ public class PatientRepository : IPatientRepository
             if (dbPatient == null) throw new Exception($"Error fetching Patient with id = {patientId}");
 
             dbPatient.UpdatedAt = DateTime.Now;
-            dbPatient.IsUploadComfirmed = status;
+            dbPatient.IsUploadComfirmed = true;
+            dbPatient.Status = status;
 
-            var r =  await Update(dbPatient, dbPatient.PatientId);
+            var r = await Update(dbPatient, dbPatient.PatientId);
 
             result.Status = true;
             result.Data.Add(r);
-            result.Message = $"Patient {patientId}, Confirmation was {r}";
+            result.Message = status ? $"Upload was Confirmed!": $"Upload was CANCELLED!";
 
         }
         catch (Exception ex)

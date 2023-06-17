@@ -8,7 +8,7 @@ namespace Document_Extractor.Services.Implementations;
 
 public class PdfExtractor : IExtractor
 {
-    public async Task<AppResult<string>> ReadFile(string filePath)
+    public async Task<AppResult<string>> ReadFile(string filePath, string targetFilePath)
     {
         var result = new AppResult<string>();
 
@@ -18,7 +18,7 @@ public class PdfExtractor : IExtractor
 
             var f = filePath.Split(Path.DirectorySeparatorChar).Last();
             var fileName = f.Split(".").First();
-            var storageFile = Path.Combine(Environment.CurrentDirectory, "Result", fileName + ".txt");
+            var storageFile = Path.Combine(targetFilePath, fileName + ".txt");
             //StorageName = storageFile;
 
             doc.LoadFromFile(filePath);
