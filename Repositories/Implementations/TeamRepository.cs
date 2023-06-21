@@ -59,10 +59,13 @@ public class TeamRepository : ITeamRepository
 
     public async Task<bool> Update(Team item, long itemId)
     {
-        var team = await GetOne(itemId);
-        if (team == null) throw new Exception($"Error fetching Team with id ={itemId}");
+        var dbTeam = await GetOne(itemId);
+        if (dbTeam is null) throw new Exception($"Error fetching Team with id ={itemId}");
+        dbTeam.Code = item.Code;
+        dbTeam.CodeDescription = item.CodeDescription;
+        dbTeam.UpdatedAt = DateTime.Now;
 
-        _context.Entry(team).State = EntityState.Modified;
+        _context.Entry(dbTeam).State = EntityState.Modified;
         await _context.SaveChangesAsync();
 
         return true;

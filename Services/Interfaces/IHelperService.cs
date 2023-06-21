@@ -9,5 +9,13 @@ public interface IHelperService
     public Task<bool> DeleteFile(string filePath);
     public Task<bool> DeleteFiles(string[] filePaths);
     public List<string> GetModelStateErrors(ModelStateDictionary modelState);
+    public Task<bool> CreateFolder(string filePath);
+
+
+
+
+    public Task<bool> CreateUploadFolders();
+    public string GetFormattedPath(string filePath);
+
 
 }

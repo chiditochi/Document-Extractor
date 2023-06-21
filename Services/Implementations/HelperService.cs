@@ -8,12 +8,18 @@ namespace Document_Extractor.Services.Implementation;
 public class HelperService : IHelperService
 {
     private readonly ILogger<HelperService> _logger;
+    private readonly IConfiguration _config;
+    private readonly IWebHostEnvironment _wenv;
 
     public HelperService(
-        ILogger<HelperService> logger
+        ILogger<HelperService> logger,
+        IConfiguration config,
+        IWebHostEnvironment wenv
     )
     {
         _logger = logger;
+        _config = config;
+        _wenv = wenv;
     }
     public Task CustomLogError(Exception e, string action)
     {
@@ -95,15 +101,66 @@ public class HelperService : IHelperService
     }
 
 
-        public List<string> GetModelStateErrors(ModelStateDictionary modelState)
+    public List<string> GetModelStateErrors(ModelStateDictionary modelState)
+    {
+        return modelState.Values.SelectMany(v => v.Errors)
+                                    .Select(v => v.ErrorMessage + " " + v.Exception)
+                                    .ToList();
+    }
+
+    public async Task<bool> CreateFolder(string filePath)
+    {
+        bool result = false;
+        try
         {
-            return modelState.Values.SelectMany(v => v.Errors)
-                                        .Select(v => v.ErrorMessage + " " + v.Exception)
-                                        .ToList();
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+                _logger.LogWarning($"{filePath} Root folder was created!");
+            }
+            result = true;
         }
+        catch (Exception e)
+        {
+            await CustomLogError(e, $"CreateFolderAndDeleteFile");
+            result = false;
+        }
+        return result;
+    }
 
+    public async Task<bool> CreateUploadFolders()
+    {
+        bool result = false;
+        try
+        {
 
+            var webroot = _wenv.WebRootPath;
 
+            var uploadPath = _config.GetSection("App:Uploads:UserUploads").Value;
+            uploadPath = GetFormattedPath(uploadPath);
+            uploadPath = Path.Join(webroot, uploadPath);
+
+            var txtUploadPath = _config.GetSection("App:Uploads:txtUploads").Value;
+            txtUploadPath = GetFormattedPath(txtUploadPath);
+            txtUploadPath = Path.Join(webroot, txtUploadPath);
+
+            await CreateFolder(uploadPath);
+            await CreateFolder(txtUploadPath);
+
+            result = true;
+        }
+        catch (Exception e)
+        {
+            await CustomLogError(e, $"CreateUploadFolders");
+            result = false;
+        }
+        return result;
+    }
+
+    public string GetFormattedPath(string filePath)
+    {
+        return string.Join(Path.DirectorySeparatorChar, filePath.Split("/"));
+    }
 
 
 

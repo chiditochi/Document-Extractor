@@ -8,5 +8,7 @@ public interface ITeamService
 {
     public Task<AppResult<TeamDTO>> GetTeam(long teamId);
     public Task<AppResult<TeamDTO>> GetTeams();
+    public Task<AppResult<TeamDTO>> AddTeam(TeamDTO team);
+    public Task<AppResult<TeamDTO>> UpdateTeam(TeamDTO team, long teamId);
 
 }

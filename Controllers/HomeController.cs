@@ -10,6 +10,7 @@ namespace Document_Extractor.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IConfiguration _config;
     private readonly IHelperService _helperService;
     private readonly IExtractorService _extractorService;
     private readonly ITeamService _teamService;
@@ -17,6 +18,7 @@ public class HomeController : Controller
 
     public HomeController(
         ILogger<HomeController> logger,
+        IConfiguration config,
         IHelperService helperService,
         IExtractorService extractorService,
         ITeamService teamService,
@@ -25,6 +27,7 @@ public class HomeController : Controller
         )
     {
         _logger = logger;
+        _config = config;
         _helperService = helperService;
         _extractorService = extractorService;
         _teamService = teamService;
@@ -61,8 +64,9 @@ public class HomeController : Controller
     }
 
     [HttpGet("/Upload")]
-    public IActionResult Upload()
+    public async Task<IActionResult> Upload()
     {
+        await _helperService.CreateUploadFolders();
         return View();
     }
 
@@ -73,7 +77,7 @@ public class HomeController : Controller
         return Json(new { Data = result });
     }
 
-    
+
 
     [HttpPost("/UploadPost")]
     public async Task<IActionResult> UploadPost([FromForm] UploadRequest formData)
@@ -122,10 +126,64 @@ public class HomeController : Controller
     }
 
 
+    [HttpGet("/ManageTeam")]
+    public IActionResult ManageTeam()
+    {
+        return View();
+    }
+
     [HttpGet("/Teams")]
     public async Task<IActionResult> Teams()
     {
         var result = await _teamService.GetTeams();
+        return Json(new { Data = result });
+    }
+
+    [HttpPost("/Team")]
+    public async Task<IActionResult> AddTeam([FromBody] TeamDTO payload)
+    {
+        var result = new AppResult<TeamDTO>();
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                List<string> errorList = _helperService.GetModelStateErrors(ModelState);
+                throw new Exception(string.Join(",", errorList));
+            }
+            result = await _teamService.AddTeam(payload);
+
+        }
+        catch (Exception ex)
+        {
+            await _helperService.CustomLogError(ex, "AddTeam");
+            result.Status = false;
+            result.Message = ex.Message;
+        }
+
+        return Json(new { Data = result });
+    }
+
+    [HttpPost("/Team/{TeamId:long}")]
+    public async Task<IActionResult> UpdateTeam([FromBody] TeamDTO payload)
+    {
+        var result = new AppResult<TeamDTO>();
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                List<string> errorList = _helperService.GetModelStateErrors(ModelState);
+                throw new Exception(string.Join(",", errorList));
+            }
+            result = await _teamService.UpdateTeam(payload, payload.TeamId);
+
+        }
+        catch (Exception ex)
+        {
+            await _helperService.CustomLogError(ex, "UpdateTeam");
+            result.Status = false;
+            result.Message = ex.Message;
+        }
+
         return Json(new { Data = result });
     }
 

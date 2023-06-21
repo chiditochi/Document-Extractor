@@ -82,6 +82,9 @@ public class ExtractorService : IExtractorService
             if (!fileModelResult.Status) throw new Exception(fileModelResult.Message);
             textPath = fileModelResult.Data.First().StorageName;
 
+            //append Team Details to txtfile 
+            var appendResult = await AppendTeamDetailsToTxtData(textPath, formData!.TeamId);
+
             var extractModel = fileModelResult.Data.First();
             var validationResult = await ValidateFileModel(extractModel);
             if (!validationResult.Status) throw new Exception(validationResult.Message);
@@ -274,6 +277,30 @@ public class ExtractorService : IExtractorService
             result.Status = false;
             result.Message = ex.Message;
         }
+        return result;
+    }
+
+    private async Task<bool> AppendTeamDetailsToTxtData(string textPath, long teamId)
+    {
+        bool result = false;
+        try
+        {
+            var team = await _teamRepository.GetOne(teamId);
+            if (team is null) throw new Exception($"Unable to fetch Team with Id ={teamId}");
+
+            if (!File.Exists(textPath)) throw new Exception($"{textPath} does not exist");
+
+            var content = new string[]{ $"TeamCode: {team.Code}", $"TeamName: {team.CodeDescription}"};
+            await File.AppendAllLinesAsync(textPath, content);
+
+            result = true;
+        }
+        catch (Exception ex)
+        {
+            await _helperService.CustomLogError(ex, "methodName");
+            result = false;
+        }
+
         return result;
     }
 

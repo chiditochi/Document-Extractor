@@ -1,0 +1,222 @@
+﻿@{
+    ViewData["Title"] = "Manage Team Page";
+}
+
+
+
+<div class="container min-vh-100">
+    <div class="row">
+        <div class="row text-center">
+            <div class="col-12 display-6 my-3">Manage Team</div>
+            <div class="col-12 display-6 my-3 text-start">
+                <button class="btn btn-success w-25 rounded py-2" id="add-team">Add Team</button>
+            </div>
+            <div class="row py-3">
+                <table id="team-table"
+                    class="table table-hover"
+                    width="100%"></table>
+            </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<dialog class="team-dialog" id="team-dialog">
+    <div class="row border-bottom border-1 border-success mx-3 py-2">
+        <div class="display-6" id="team-title">Add Team</div>
+    </div>
+    <form id="team-form" class="row p-3" >
+            <div class="form-group mb-3">
+                <input type="text" class="form-control col-12" id="team-id" placeholder="Team Id">
+            </div>
+            <div class="form-group mb-3">
+                <input type="text" class="form-control col-12" id="team-code" placeholder="Team Code">
+            </div>
+            <div class="form-group mb-3">
+                <input type="text" class="form-control col-12" id="team-description" placeholder="Team Description">
+            </div>
+            <div class="form-group d-flex justify-content-between">
+                <button class="btn btn-warning col-5" id="team-cancel">Cancel</button>
+                <button class="btn btn-success col-5" id="team-add"></button>
+            </div>
+    </form>
+
+</dialog>
+
+
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(async function () {
+            /*
+
+            */
+
+            /* Declarations */
+            let messageLabel = "";
+            const datetimeVars = ["dateTime", "patientDOB"];
+            const teamTable = "team-table";
+            let teamsData = [];
+
+            //input elements
+            const addNewTeamBtn = $("#add-team");
+            const teamForm = $("#team-form");
+
+            //form elements 
+            const teamTitle = $("#team-title");
+            const teamIdInput = $("#team-id");
+            const teamCodeInput = $("#team-code");
+            const teamCodeDescriptionInput = $("#team-description");
+            const teamCancelBtn = $("#team-cancel");
+            const teamSubmitBtn = $("#team-add");
+
+            /* Actions */
+            await loadTeamData();
+
+
+            addNewTeamBtn.click(function(){
+                teamForm[0].reset();
+                teamTitle.text("Add Team");
+                teamSubmitBtn.text("Add");
+                teamSubmitBtn.data("action", "Add");
+                $('#team-dialog')[0].showModal();
+            });
+
+            teamCancelBtn.click(function(evt){
+                evt.preventDefault();
+                $('#team-dialog')[0].close();
+                teamForm[0].reset();
+            });
+
+            teamSubmitBtn.click(async function(evt){
+                evt.preventDefault();
+
+                const add = "Add";
+                const edit = "Edit";
+                const formAction = $(this).data("action");
+                const isAdd = formAction === add ? true : false;
+
+                messageLabel = `${isAdd ? add : edit} Team`;
+
+                const formData = getFormData(isAdd);
+                //validation check
+                if(formData.code === "" || formData.codeDescription === ""){
+                    let errorMsg = `{Code} and {CodeDescription} are required`;
+                    appJS.displayError({ message: errorMsg, title: messageLabel }); 
+                    return;
+                }
+
+                var options = appJS.makeApiCallDefaultOption();
+                options.method = "POST";
+                options.body = JSON.stringify(formData);
+                const url = isAdd ? "/Team" : `/Team/${formData.teamId}`;
+
+                await appJS.setSpinnerPromise(true);
+                var res = await appJS.makeApiCall(url, options);
+
+                appJS.setSpinnerPromise(false, 1000);
+                if(res.data.status){
+                    appJS.displaySuccess({ message: res.data.message, title: messageLabel })
+                    $('#team-dialog')[0].close();
+                    teamForm[0].reset();
+                    await loadTeamData(res.data.data);
+
+                }
+                else appJS.displayError({ message: res.data.message, title: messageLabel }); 
+
+
+
+                $('#team-dialog')[0].close();
+                teamForm[0].reset();
+            });
+
+
+
+            /* implementations */
+
+                async function loadTeamData(){
+                    messageLabel = "Team Data";
+                    //$('.team-dialog')[0].showModal();
+
+                    var options = appJS.makeApiCallDefaultOption();
+                    await appJS.setSpinnerPromise(true);
+                    var res = await appJS.makeApiCall(`/Teams`, options);
+
+                    appJS.setSpinnerPromise(false, 1000);
+                    if(res.data.status){
+                        teamsData = res.data.data;
+                        await teamHandler(res.data.data);
+                        attachOnClickToUpdateBtn();
+                    }
+                    else appJS.displayError({ message: res.data.message, title: messageLabel }); 
+
+                }
+
+                async function teamHandler(data){
+
+                    var tableData = null;
+                    if (data.length > 0) {
+                        tableData = data.map(function (v, index) {
+                            let createdAt = `${appJS.getDisplayDate(v.createdAt)}`;
+
+                            const updateBtn = `<button data-id="${v.teamId}"  class="btn btn-warning update-btn" title="${v.codeDescription}">Update</button>`;
+
+
+                            return [
+                                appJS.formatIndex(++index), 
+                                v.code, 
+                                v.codeDescription, 
+                                createdAt,
+                                updateBtn
+                            ];
+                        });
+                    }
+
+                    var teamTableColumnTitles = ["#", "Code", "Name", "CreatedAt", ""];
+                    var teamTableColumn = appJS.getDatatableColumns(teamTableColumnTitles);
+                    appJS.populateDatatable(teamTable, teamTableColumn, tableData, false);
+
+                }
+
+                function updateTeam(){
+                    messageLabel = "Update Team";
+
+                    var id = $(this).data("id");
+                    const teamItem = teamsData.find(v => v.teamId === id);
+                    teamForm[0].reset();
+                    teamTitle.text(`Edit ${teamItem.code} Team`);
+                    teamIdInput.val(teamItem.teamId);
+                    teamCodeInput.val(teamItem.code);
+                    teamCodeDescriptionInput.val(teamItem.codeDescription);
+                    teamSubmitBtn.data("action", "Edit");
+                    teamSubmitBtn.text("Update");
+                    $('#team-dialog')[0].showModal();
+
+                }
+
+
+                function attachOnClickToUpdateBtn(){
+                    const updateBtns = $(".update-btn");
+                    for(let i = 0; i < updateBtns.length; i++){
+                        updateBtns[i].onclick = updateTeam;
+                    }
+                }
+
+                function getFormData(isAdd = true){
+                    let result = {};
+
+                    result["code"] = teamCodeInput.val();
+                    result["codeDescription"] = teamCodeDescriptionInput.val();
+                    if(!isAdd) result["teamId"] =  teamIdInput.val();
+
+                    return result;
+
+                }
+
+
+
+
+        });
+    </script>
+}

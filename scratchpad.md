@@ -33,10 +33,11 @@ libman uninstall <LIBRARY> [--verbosity]
   - dotnet ef migrations script AddNewTables AddAuditTable
 
 ### Todos 
-    - authorization
-    - authentication
     - login 
     - logout
+    - cleanup cancelled uploads 
+        - from db 
+        - form uploads
 
 
 ## db init 

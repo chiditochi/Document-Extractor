@@ -62,7 +62,7 @@ public class TeamService : ITeamService
             if (r.Any())
             {
                 var dtos = _mapper.Map<IEnumerable<TeamDTO>>(r);
-                result.Data = dtos.ToList();
+                result.Data = dtos.OrderByDescending(x =>x.CreatedAt).ToList();
             }
             result.Status = true;
 
@@ -78,5 +78,63 @@ public class TeamService : ITeamService
 
     }
 
- 
+    public async Task<AppResult<TeamDTO>> AddTeam(TeamDTO team)
+    {
+        var result = new AppResult<TeamDTO>();
+        try
+        {
+            var teamData = _mapper.Map<Team>(team);
+            team.CreatedAt = DateTime.Now;
+            team.UpdatedAt = DateTime.Now;
+
+            var dbTeam = await _teamRepository.Create(teamData);
+            if (dbTeam is null) throw new Exception($"Unable to Add team with Code = {team.Code}, Description = {team.CodeDescription}");
+
+            var dto = _mapper.Map<TeamDTO>(dbTeam);
+            result.Data.Add(dto);
+            result.Message = $"New Team {dto.CodeDescription} was Added!";
+
+            result.Status = true;
+        }
+        catch (Exception ex)
+        {
+            await _helperService.CustomLogError(ex, "AddTeam");
+            result.Status = false;
+            result.Message = ex.Message;
+        }
+
+        return result;
+
+    }
+    public async Task<AppResult<TeamDTO>> UpdateTeam(TeamDTO team, long teamId)
+    {
+        var result = new AppResult<TeamDTO>();
+        try
+        {
+            var teamData = _mapper.Map<Team>(team);
+            team.UpdatedAt = DateTime.Now;
+
+            bool status = await _teamRepository.Update(teamData, teamId);
+            if (!status) throw new Exception($"Unable to Update team with Code = {team.Code}, Description = {team.CodeDescription}");
+
+            result.Data.Add(team);
+            result.Status = true;
+            result.Message = $"Team {team.Code} was Updated!";
+
+        }
+        catch (Exception ex)
+        {
+            await _helperService.CustomLogError(ex, "AddTeam");
+            result.Status = false;
+            result.Message = ex.Message;
+        }
+
+        return result;
+
+    }
+
+
+
+
+
 }

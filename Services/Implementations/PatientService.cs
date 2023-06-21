@@ -73,7 +73,7 @@ public class PatientService : IPatientService
         return result;
     }
 
-    public async Task<AppResult<PatientDTO>> GetPatients(bool? isUploadComfirmed)
+    public async Task<AppResult<PatientDTO>> GetPatients(bool? status)
     {
         var result = new AppResult<PatientDTO>();
         try
@@ -81,7 +81,7 @@ public class PatientService : IPatientService
             var r = await _patientRepository.GetAll();
             // if (r == null || !r.Any()) throw new Exception($"Error fetching Patients");
 
-            if (isUploadComfirmed != null) r = r.Where(x => x.IsUploadComfirmed == isUploadComfirmed.Value).ToList();
+            if (status != null) r = r.Where(x => x.Status == status.Value).ToList();
             var dtos = _mapper.Map<IEnumerable<PatientDTO>>(r);
             result.Data.AddRange(dtos);
 
