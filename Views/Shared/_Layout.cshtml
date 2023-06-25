@@ -26,14 +26,11 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        @if(string.IsNullOrEmpty(Context.Session.GetString("username")))
+                        @if(!string.IsNullOrEmpty(Context.Session.GetString("username")))
                         {
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        }
-                        else
-                        {
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Upload">Upload</a>
                         </li>

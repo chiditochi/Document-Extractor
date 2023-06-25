@@ -45,7 +45,7 @@ public class HomeController : Controller
     }
 
     [HttpGet("/")]
-    [AllowAnonymous]
+    [AppAuthorize]
     public IActionResult Index()
     {
         return View();
@@ -172,14 +172,14 @@ public class HomeController : Controller
         return Json(new { Data = result });
     }
 
-    [AppAuthorize]
     [HttpGet("/ManageTeam")]
+    [AppAuthorize]
     public IActionResult ManageTeam()
     {
         return View();
     }
     [HttpGet("/Teams")]
-    [AllowAnonymous]
+    [AppAuthorize]
     public async Task<IActionResult> Teams()
     {
         var result = await _teamService.GetTeams();
