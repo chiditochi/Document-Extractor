@@ -84,6 +84,8 @@ public class ExtractorService : IExtractorService
 
             //append Team Details to txtfile 
             var appendResult = await AppendTeamDetailsToTxtData(textPath, formData!.TeamId);
+            //copy txt file to Uploads folder 
+            var copyFileResult =  await CopyTxtFileToUploadsFolder(textPath);
 
             var extractModel = fileModelResult.Data.First();
             var validationResult = await ValidateFileModel(extractModel);
@@ -243,7 +245,7 @@ public class ExtractorService : IExtractorService
             {
                 foreach (var prop in props)
                 {
-                    if (value.StartsWith(prop))
+                    if (value.StartsWith(prop) && value.Split(":").First() == prop)
                     {
                         var itemValue = value.Replace(prop + ":", "").Trim();
                         var formatter = string.Empty;
@@ -294,14 +296,43 @@ public class ExtractorService : IExtractorService
 
             if (!File.Exists(textPath)) throw new Exception($"{textPath} does not exist");
 
-            var content = new string[]{ $"TeamCode: {team.Code}", $"TeamName: {team.CodeDescription}"};
+            var content = new string[] { $"TeamCode: {team.Code}", $"TeamName: {team.CodeDescription}" };
             await File.AppendAllLinesAsync(textPath, content);
 
             result = true;
         }
         catch (Exception ex)
         {
-            await _helperService.CustomLogError(ex, "methodName");
+            await _helperService.CustomLogError(ex, "AppendTeamDetailsToTxtData");
+            result = false;
+        }
+
+        return result;
+    }
+    private async Task<bool> CopyTxtFileToUploadsFolder(string textPath)
+    {
+        bool result = false;
+        try
+        {
+            /*
+                C:\Projects\UploadConverter\wwwroot\Uploads\txtUploads\1687716067_James-Brown.txt
+                C:\Projects\UploadConverter\wwwroot\Uploads\UserUploads\1687716067_James-Brown.docx
+            */
+            var fileName = textPath.Split(Path.DirectorySeparatorChar).Last();
+
+            var storageLocation = _config.GetSection("App:Uploads:UserUploads").Value;
+            storageLocation = string.Join(Path.DirectorySeparatorChar, storageLocation.Split("/"));
+            if (string.IsNullOrEmpty(storageLocation)) throw new Exception($"No Upload Location configured!");
+            var destinationPath = Path.Combine(_wenv.WebRootPath, storageLocation, fileName);
+
+
+            File.Copy(textPath, destinationPath);
+
+            result = true;
+        }
+        catch (Exception ex)
+        {
+            await _helperService.CustomLogError(ex, "CopyTxtFileToUploadsFolder");
             result = false;
         }
 
@@ -416,7 +447,12 @@ public class ExtractorService : IExtractorService
             if (propValue == null || string.IsNullOrEmpty(propValue?.ToString())) missingList.Add(prop);
         }
 
-        if (missingList.Count > 0) throw new Exception(string.Join(", ", missingList));
+
+        if (missingList.Count > 0)
+        {
+            var errorMessage = missingList.Count == 1 ? $"{string.Join(", ", missingList)} is Required!" : $"Required fields missing are {string.Join(", ", missingList)}";
+             throw new Exception(errorMessage);
+        }
 
 
     }

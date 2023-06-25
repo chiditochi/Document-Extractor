@@ -2,7 +2,7 @@ namespace Document_Extractor.Models.DTOs;
 
 public class ExtractDTO
 {
-    public DateTime DateTime { get; set; }
+    public DateTime? DateTime { get; set; }
     public string OperatorFirstname { get; set; } = string.Empty;
     public string OperatorMiddle { get; set; } = string.Empty;
     public string OperatorSurname { get; set; } = string.Empty;
@@ -11,7 +11,7 @@ public class ExtractDTO
     public string PatientFirstname { get; set; } = string.Empty;
     public string PatientMiddle { get; set; } = string.Empty;
     public string PatientSurname { get; set; } = string.Empty;
-    public DateTime PatientDOB { get; set; }
+    public DateTime? PatientDOB { get; set; }
     public string PatientSex { get; set; } = string.Empty;
     public string PatientSexCode { get; set; } = string.Empty;
     public string PatientHousename { get; set; } = string.Empty;
