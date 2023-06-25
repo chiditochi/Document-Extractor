@@ -2,6 +2,15 @@
 
 
 const appJS = {
+  appRedirect: function(path){
+    window.location.href = path;
+  },
+  appAlert: function(data){
+     alert(JSON.stringify(data, null, 4));
+  },
+  disableBtn: function(selector, disable=true){
+    $(selector).attr("disabled", disable)
+  },
   getSelectedOption: function (targetSelector) {
     var selectedValue = $(`${targetSelector} option:selected`).val();
     return selectedValue;
@@ -124,6 +133,7 @@ const appJS = {
     "multipart/form-data"
       var options =  { 
           method: "GET", 
+          credentials: 'include',
           headers: { 
               "Accept": "application/json"
           }, 
@@ -140,24 +150,26 @@ const appJS = {
       //if (!resp.ok) return Promise.reject(resp);
       result = await resp.json();
     } catch (err) {
-      console.error(err);
-      var eMsg1 = err?.message;
-      var eMsg2 = await err.json();
-      var errorMessage = eMsg1 || eMsg2; 
+      console.log({ err });
+      // var eMsg1 = err?.message;
+      // var eMsg2 = await err.json();
+      // var errorMessage = eMsg1 || eMsg2; 
+      var errorMessage = err.message; 
 
-      result = { message:errorMessage, status: false, data: null };
+      result = { data: {message:errorMessage, status: false, data: null } };
     }
     return result;
   },
 
   displayError: function (obj) {
-    //{ message, status, title }
-    // console.error(obj.title);
+    const options = appJS.getToastrOptions();
+    toastr.options = options;
     toastr.error(obj.message, obj.title);
   },
   displaySuccess: function (obj) {
-    //{ message, status, title }
-    // console.error(obj.title);
+    const options = appJS.getToastrOptions();
+    toastr.options = options;
+
     toastr.success(obj.message, obj.title);
   },
 
@@ -178,16 +190,16 @@ const appJS = {
   },
   getToastrOptions: function () {
     return {
-      closeButton: false,
+      closeButton: true,
       debug: false,
       newestOnTop: true,
       progressBar: true,
-      positionClass: "toast-top-right",
+      positionClass: "toast-top-center",
       preventDuplicates: false,
       onclick: null,
       showDuration: "300",
       hideDuration: "1000",
-      timeOut: "5000",
+      timeOut: "0",
       extendedTimeOut: "1000",
       showEasing: "swing",
       hideEasing: "linear",

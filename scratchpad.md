@@ -33,8 +33,18 @@ libman uninstall <LIBRARY> [--verbosity]
   - dotnet ef migrations script AddNewTables AddAuditTable
 
 ### Todos 
-    - login 
+    - login
+        - form 
+        - logic action 
+        - Session package 
+        - AD package 
     - logout
+        - logic action
+    - extracted data:
+        - format date | 27 June 2023 10:30  as dd MMM yyyy HH:mm (done)
+    - Notification:
+        - make stay longer (done)
+
     - cleanup cancelled uploads 
         - from db 
         - form uploads

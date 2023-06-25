@@ -8,6 +8,8 @@ using Document_Extractor.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Microsoft.AspNetCore.Authentication.Negotiate;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +36,33 @@ builder.Services.AddDbContextPool<AppDbContext>(options =>
  ));
 
 builder.Services.AddSingleton<AppDapperContext>();
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(Convert.ToDouble(builder.Configuration.GetSection("App:CookieTimeOutInMS").Value));
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = builder.Configuration.GetSection("App:CookieTimeOutInMS").Value.Replace(" ", "");
+
+});
+
+// builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+//    .AddNegotiate();
+
+// builder.Services.AddAuthorization(options =>
+// {
+//     // By default, all incoming requests will be authorized according to the default policy.
+//     options.FallbackPolicy = options.DefaultPolicy;
+
+// });
+
+// builder.Services.ConfigureApplicationCookie(options =>
+// {
+//     options.LoginPath = new PathString("/Login");
+//     options.AccessDeniedPath = new PathString("/Login");
+// });
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
@@ -77,7 +106,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+//app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",

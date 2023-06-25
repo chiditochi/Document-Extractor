@@ -4,8 +4,12 @@ using Document_Extractor.Models;
 using Document_Extractor.Models.Shared;
 using Document_Extractor.Models.DB;
 using Document_Extractor.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Document_Extractor.Configuration.Filters;
 
 namespace Document_Extractor.Controllers;
+
 
 public class HomeController : Controller
 {
@@ -15,6 +19,8 @@ public class HomeController : Controller
     private readonly IExtractorService _extractorService;
     private readonly ITeamService _teamService;
     private readonly IPatientService _patientService;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly SignInManager<AppUser> _signInManger;
 
     public HomeController(
         ILogger<HomeController> logger,
@@ -22,7 +28,9 @@ public class HomeController : Controller
         IHelperService helperService,
         IExtractorService extractorService,
         ITeamService teamService,
-        IPatientService patientService
+        IPatientService patientService,
+        UserManager<AppUser> userManager,
+        SignInManager<AppUser> signInManager
 
         )
     {
@@ -32,14 +40,13 @@ public class HomeController : Controller
         _extractorService = extractorService;
         _teamService = teamService;
         _patientService = patientService;
+        _userManager = userManager;
+        _signInManger = signInManager;
     }
 
+    [HttpGet("/")]
+    [AllowAnonymous]
     public IActionResult Index()
-    {
-        return View();
-    }
-
-    public IActionResult Privacy()
     {
         return View();
     }
@@ -51,19 +58,74 @@ public class HomeController : Controller
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
+
     [HttpGet("/Login")]
+    [AllowAnonymous]
     public IActionResult Login()
     {
         return View();
     }
 
-    [HttpPost("/Login")]
-    public IActionResult Login(string email, string password)
+    [HttpGet("/Logout")]
+    [AppAuthorize]
+    public async Task<IActionResult> Logout()
     {
-        return View();
+        var result = new AppResult<bool>();
+        try
+        {
+            await _signInManger.SignOutAsync();
+            HttpContext.Session.Remove("username");
+
+            result.Status = true;
+            result.Message = "You are signed out!";
+        }
+        catch (Exception ex)
+        {
+            await _helperService.CustomLogError(ex, "Logout");
+            result.Message = ex.Message;
+            result.Status = false;
+        }
+
+        return Redirect(nameof(Login));
+
+    }
+
+    [HttpPost("/Login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] LoginDTO login)
+    {
+        var result = new AppResult<bool>();
+
+        try
+        {
+            if (!ModelState.IsValid) throw new Exception($"Email and Password is Required!");
+            var user = await _userManager.FindByEmailAsync(login.Email);
+            if (user == null && !user!.IsActive) throw new Exception($"User not Found or is InActive");
+            var r = await _signInManger.PasswordSignInAsync(user!, login.Password, false, true);
+            if (!r.Succeeded) throw new Exception($"Wrong login details provided!");
+
+            //create Session 
+            HttpContext.Session.SetString("username", user.UserName);
+
+            result.Status = true;
+            result.Message = $"Welcome {user!.LastName}, {user.FirstName}";
+
+            //return Redirect("/");
+
+        }
+        catch (Exception ex)
+        {
+            result.Status = false;
+            result.Message = ex.Message;
+            HttpContext.Session.Remove("username");
+
+        }
+
+        return Json(new { Data = result });
     }
 
     [HttpGet("/Upload")]
+    [AppAuthorize]
     public async Task<IActionResult> Upload()
     {
         await _helperService.CreateUploadFolders();
@@ -71,13 +133,12 @@ public class HomeController : Controller
     }
 
     [HttpGet("/UploadData")]
+    [AppAuthorize]
     public async Task<IActionResult> UploadData()
     {
         var result = await _patientService.GetPatients(true);
         return Json(new { Data = result });
     }
-
-
 
     [HttpPost("/UploadPost")]
     public async Task<IActionResult> UploadPost([FromForm] UploadRequest formData)
@@ -104,20 +165,6 @@ public class HomeController : Controller
     }
 
 
-    [HttpGet("/Patients")]
-    public IActionResult GetPatients()
-    {
-        return Json(new { });
-    }
-
-    //delete this 
-    [HttpGet("/Patient/{PatientId:long}")]
-    public async Task<IActionResult> GetPatient(long PatientId)
-    {
-        var result = await _patientService.GetPatient(PatientId);
-        return Json(new { Data = result });
-    }
-
     [HttpPost("/Upload/Confirmation")]
     public async Task<IActionResult> UploadConfirmation([FromBody] UploadConfirmationRequest payload)
     {
@@ -125,14 +172,14 @@ public class HomeController : Controller
         return Json(new { Data = result });
     }
 
-
+    [AppAuthorize]
     [HttpGet("/ManageTeam")]
     public IActionResult ManageTeam()
     {
         return View();
     }
-
     [HttpGet("/Teams")]
+    [AllowAnonymous]
     public async Task<IActionResult> Teams()
     {
         var result = await _teamService.GetTeams();

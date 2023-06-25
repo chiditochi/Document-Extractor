@@ -51,5 +51,11 @@ namespace Document_Extractor.Models.DB
 
         public virtual TeamDTO Team { get; set; } = new TeamDTO();
 
+
+        /* for view */
+        public string DateTimeString { get; set; }
+        public string PatientDOBString { get; set; }
+
+
     }
 }

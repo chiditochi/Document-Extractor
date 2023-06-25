@@ -48,7 +48,7 @@ public class PatientRepository : IPatientRepository
 
     public async Task<IEnumerable<Patient>> GetAll()
     {
-        var result = await _context.Patients.Include(x =>x.Team).OrderByDescending(x =>x.CreatedAt).ToListAsync();
+        var result = await _context.Patients.Include(x => x.Team).OrderByDescending(x => x.CreatedAt).ToListAsync();
         return result;
     }
 
@@ -75,7 +75,7 @@ public class PatientRepository : IPatientRepository
 
         try
         {
-            var query = $"select * from dbo.Patients where ";
+            var query = $"select * from dbo.Patients where IsUploadComfirmed = 1 and Status = 1";
             var propKeys = props.Keys.ToList();
             var formatPropKeys = propsAndFormat.Keys.ToList();
 
@@ -83,6 +83,7 @@ public class PatientRepository : IPatientRepository
             var notDatetimeProps = props.Where(x => !formatPropKeys.Contains(x.Key)).ToList();
 
             var queryFilter = string.Empty;
+            if (notDatetimeProps.Count > 0) query += " and";
             foreach (var itemProp in notDatetimeProps)
             {
                 var propKey = itemProp.Key;
@@ -160,7 +161,7 @@ public class PatientRepository : IPatientRepository
 
             result.Status = true;
             result.Data.Add(r);
-            result.Message = status ? $"Upload was Confirmed!": $"Upload was CANCELLED!";
+            result.Message = status ? $"Upload was Confirmed!" : $"Upload was CANCELLED!";
 
         }
         catch (Exception ex)

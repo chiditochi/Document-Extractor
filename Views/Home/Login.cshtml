@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Login Page";
+}
+
+
+
+<div class="container min-vh-100">
+    <div class="row">
+        <div class="row">
+            <div class="col-12 display-6 my-3 text-center text-danger lead">Login</div>
+            <div class="row py-3">
+                <form action="" class="col-12 col-lg-6 mx-auto" id="form-login">
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control" id="user-email" placeholder="Enter Email">
+                    </div>
+                    <div class="form-group mb-3">
+                        <input type="password" class="form-control" id="user-password" placeholder="Enter Password">
+                    </div>
+                    <div class="form-group mb-3">
+                        <button class="btn btn-success w-25" id="login-btn">Login</button>
+                    </div>
+                </form>
+            </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+                            <script type="text/javascript">
+                                $(document).ready(async function () {
+                                    /*
+
+                                    */
+
+                                    /* Declarations */
+                                    let messageLabel = "";
+                                    const datetimeVars = ["dateTime", "patientDOB"];
+
+                                    const loginForm = $("#form-login");
+                                    const loginBtn = loginForm.find("#login-btn");
+                                    const userEmailInput = loginForm.find("#user-email");
+                                    const passwordInput = loginForm.find("#user-password");
+
+
+                                    /* Actions */
+                                    loginBtn.click(async function(evt){
+                                        evt.preventDefault();
+
+                                        messageLabel = "User Login";
+
+                                        var formValues =  getFormValues();
+                                        var isValid = validateFormValues(formValues);
+                                        if(!isValid){
+                                            appJS.displayError({ message: `Please provide an Email and Password!`, title: messageLabel });
+                                            return;
+                                        }
+
+
+                                        var options = appJS.makeApiCallDefaultOption();
+                                        options.method = "POST";
+                                        options.body = JSON.stringify(formValues);
+
+        @* appJS.displaySuccess({ message: JSON.stringify(formValues, null, 4), title: messageLabel });
+                    return; *@
+
+                                        await appJS.setSpinnerPromise(true);
+                                        var res = await appJS.makeApiCall(`/Login`, options);
+
+                                        appJS.setSpinnerPromise(false, 1000);
+                                        if(res.data.status){
+                                            //console.log({ d: res.data.data[0] });
+                                            appJS.displaySuccess({ message: res.data.message, title: messageLabel });
+                                            const redirectLocation = `${location.origin}/Upload`;
+                                            appJS.appRedirect(redirectLocation);
+                                        }
+                                        else appJS.displayError({ message: res.data.message, title: messageLabel }); 
+
+                                    })
+
+                                    /* implementations */
+
+                                    function getFormValues(){
+                                        const result = { email: '', password: '' };
+                                        result.email = userEmailInput.val();
+                                        result.password = passwordInput.val();
+                                        return result;
+                                    }
+
+                                    function validateFormValues(dataValues){
+                                        console.log({ validationData: dataValues });
+                                        var result = false;
+                                        if( dataValues.email && dataValues.email.trim() !== "" && dataValues.password && dataValues.password.trim() !== "" ){
+                                            result = true;
+                                        }
+
+                                        return result;
+                                    }
+
+                                });
+                            </script>
+}

@@ -14,7 +14,6 @@
 
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
 </head>
 <body>
     <header>
@@ -27,15 +26,35 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        @if(string.IsNullOrEmpty(Context.Session.GetString("username")))
+                        {
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        }
+                        else
+                        {
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Upload">Upload</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="ManageTeam">Manage Team</a>
                         </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav flex-grow-1 justify-content-end">
+                        @if(string.IsNullOrEmpty(Context.Session.GetString("username")))
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link bg-gradient bg-light rounded" asp-area="" asp-controller="Home" asp-action="Login">Login</a>
+                        </li>
+                        }
+                        else
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link bg-gradient bg-light rounded" asp-area="" asp-controller="Home" asp-action="Logout">Logout</a>
+                        </li>
+                        }
                     </ul>
                 </div>
             </div>

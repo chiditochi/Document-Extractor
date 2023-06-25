@@ -99,7 +99,12 @@
                     $(".app-dialog")[0].close();
                     $(".app-dialog").hide();
                 }
-                else appJS.displayError({ message: res.data.message, title: messageLabel }); 
+                else {
+                     appJS.displayError({ message: `Error ${messageLabel}`, title: messageLabel }); 
+                    $(".app-dialog")[0].close();
+                    $(".app-dialog").hide();
+
+                }
 
             }
 
@@ -158,14 +163,33 @@
                     let t = "";
 
                     let viewKey = formatKey(key);
-                    let excludes = ["createdAt", "updatedAt"];
+                    let excludes = ["createdAt", "updatedAt", "dateTimeString", "patientDOBString"];
 
                     if(data[key] && excludes.indexOf(key) === -1 && data[key].length > 0){
-                        t = `<div class="row my-2">
+                        if(key === "dateTime"){
+                            const viewValue = data["dateTimeString"];
+                            t = `<div class="row my-2">
+                                <div class="col-6 border py-2 bg-light">${viewKey}</div>
+                                <div class="col-6 border py-2">${viewValue}</div> 
+                                </div>
+                                `;
+                        }
+                        else if(key === "patientDOB"){
+                            const viewValue = data["patientDOBString"];
+                            t = `<div class="row my-2">
+                                <div class="col-6 border py-2 bg-light">${viewKey}</div>
+                                <div class="col-6 border py-2">${viewValue}</div> 
+                                </div>
+                                `;
+                        }
+                        else{
+                            t = `<div class="row my-2">
                             <div class="col-6 border py-2 bg-light">${viewKey}</div>
                             <div class="col-6 border py-2">${data[key]}</div> 
                             </div>
                             `;
+                        
+                        }
                     }
                     return t;
                 });

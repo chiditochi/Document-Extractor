@@ -92,6 +92,10 @@ public class ExtractorService : IExtractorService
             //persist data 
             var patientDTO = await StoreUploadPatient(formData!.TeamId, filePath, textPath, extractModel);
 
+            var viewDateTimeFormat = _config.GetSection("App:ViewDateTimeFormat").Value;
+            patientDTO.DateTimeString = patientDTO.DateTime.ToString(viewDateTimeFormat);
+            patientDTO.PatientDOBString = patientDTO.PatientDOB.ToString(viewDateTimeFormat);
+
             result.Status = true;
             result.Data.Add(patientDTO);
 
@@ -447,7 +451,7 @@ public class ExtractorService : IExtractorService
 
             var uploadExistResult = await _patientRepository.DoesUploadExist(modelPropsDict, propsAndFormat);
             if (!uploadExistResult.Status) throw new Exception(uploadExistResult.Message);
-            if (uploadExistResult.Data.First()) throw new Exception($"Data Upload exists");
+            if (uploadExistResult.Data.First()) throw new Exception($"This form has been uploaded before!");
 
         }
     }
