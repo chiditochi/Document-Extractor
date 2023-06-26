@@ -7,6 +7,7 @@ using Document_Extractor.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Document_Extractor.Configuration.Filters;
+using Document_Extractor.Repositories.Interfaces;
 
 namespace Document_Extractor.Controllers;
 
@@ -21,6 +22,7 @@ public class HomeController : Controller
     private readonly IPatientService _patientService;
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManger;
+    private readonly IAppUserRepository<AppUser> _appUserRepository;
 
     public HomeController(
         ILogger<HomeController> logger,
@@ -30,7 +32,8 @@ public class HomeController : Controller
         ITeamService teamService,
         IPatientService patientService,
         UserManager<AppUser> userManager,
-        SignInManager<AppUser> signInManager
+        SignInManager<AppUser> signInManager,
+        IAppUserRepository<AppUser> appUserRepository
 
         )
     {
@@ -42,10 +45,12 @@ public class HomeController : Controller
         _patientService = patientService;
         _userManager = userManager;
         _signInManger = signInManager;
+        _appUserRepository = appUserRepository;
     }
 
     [HttpGet("/")]
     [AppAuthorize]
+    [AppUserTypeFilter("Patient")]
     public IActionResult Index()
     {
         return View();
@@ -99,18 +104,19 @@ public class HomeController : Controller
         try
         {
             if (!ModelState.IsValid) throw new Exception($"Email and Password is Required!");
-            var user = await _userManager.FindByEmailAsync(login.Email);
-            if (user == null && !user!.IsActive) throw new Exception($"User not Found or is InActive");
+            //var user = await _userManager.FindByEmailAsync(login.Email);
+            var user = await _appUserRepository.GetByEmail(login.Email);
+            if (user == null || !user!.IsActive) throw new Exception($"User not Found or is InActive");
             var r = await _signInManger.PasswordSignInAsync(user!, login.Password, false, true);
             if (!r.Succeeded) throw new Exception($"Wrong login details provided!");
 
             //create Session 
             HttpContext.Session.SetString("username", user.UserName);
+            HttpContext.Session.SetString("usertype", user.UserType.Label);
 
             result.Status = true;
             result.Message = $"Welcome {user!.LastName}, {user.FirstName}";
 
-            //return Redirect("/");
 
         }
         catch (Exception ex)
@@ -174,10 +180,12 @@ public class HomeController : Controller
 
     [HttpGet("/ManageTeam")]
     [AppAuthorize]
+    [AppUserTypeFilter("OpTeam")]
     public IActionResult ManageTeam()
     {
         return View();
     }
+
     [HttpGet("/Teams")]
     [AppAuthorize]
     public async Task<IActionResult> Teams()
@@ -187,6 +195,7 @@ public class HomeController : Controller
     }
 
     [HttpPost("/Team")]
+    [AppUserTypeFilter("OpTeam")]
     public async Task<IActionResult> AddTeam([FromBody] TeamDTO payload)
     {
         var result = new AppResult<TeamDTO>();
@@ -211,6 +220,7 @@ public class HomeController : Controller
     }
 
     [HttpPost("/Team/{TeamId:long}")]
+    [AppUserTypeFilter("OpTeam")]
     public async Task<IActionResult> UpdateTeam([FromBody] TeamDTO payload)
     {
         var result = new AppResult<TeamDTO>();

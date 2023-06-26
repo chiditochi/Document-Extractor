@@ -48,7 +48,7 @@ public class AppUserRepository : IAppUserRepository<AppUser>
     public async Task<AppUser> GetByEmail(string email)
     {
         var item = await _context.Users
-                                //.Include(x => x.UserType)
+                                .Include(x => x.UserType)
                                 //.Include(x => x.UserRoles)
                                 .AsNoTracking().FirstOrDefaultAsync(x => x.Email == email);
         return item;
@@ -124,4 +124,9 @@ public class AppUserRepository : IAppUserRepository<AppUser>
         await _userManager.DeleteAsync(item);
         return true;
     }
+
+
+
+
+
 }

@@ -85,7 +85,7 @@ public class ExtractorService : IExtractorService
             //append Team Details to txtfile 
             var appendResult = await AppendTeamDetailsToTxtData(textPath, formData!.TeamId);
             //copy txt file to Uploads folder 
-            var copyFileResult =  await CopyTxtFileToUploadsFolder(textPath);
+            var copyFileResult = await CopyTxtFileToUploadsFolder(textPath);
 
             var extractModel = fileModelResult.Data.First();
             var validationResult = await ValidateFileModel(extractModel);
@@ -296,7 +296,7 @@ public class ExtractorService : IExtractorService
 
             if (!File.Exists(textPath)) throw new Exception($"{textPath} does not exist");
 
-            var content = new string[] { $"TeamCode: {team.Code}", $"TeamName: {team.CodeDescription}" };
+            var content = new string[] { $"TeamCode: {team.Code}", $"TeamDescription: {team.CodeDescription}" };
             await File.AppendAllLinesAsync(textPath, content);
 
             result = true;
@@ -451,7 +451,7 @@ public class ExtractorService : IExtractorService
         if (missingList.Count > 0)
         {
             var errorMessage = missingList.Count == 1 ? $"{string.Join(", ", missingList)} is Required!" : $"Required fields missing are {string.Join(", ", missingList)}";
-             throw new Exception(errorMessage);
+            throw new Exception(errorMessage);
         }
 
 
