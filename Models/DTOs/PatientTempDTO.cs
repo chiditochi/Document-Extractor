@@ -1,14 +1,14 @@
 namespace Document_Extractor.Models.DB
 {
-    public class Patient
+    public class PatientTempDTO
     {
-        public Patient()
+        public PatientTempDTO()
         {
             CreatedAt = DateTime.Now;
             UpdatedAt = DateTime.Now;
         }
 
-        public long PatientId { get; set; }
+        public long PatientTempId { get; set; }
         public DateTime DateTime { get; set; }
         public string? OperatorFirstname { get; set; }
         public string? OperatorMiddle { get; set; }
@@ -41,15 +41,19 @@ namespace Document_Extractor.Models.DB
 
 
         public long TeamId { get; set; }
-        // public bool IsUploadComfirmed { get; set; }
-        // public bool Status { get; set; }
-        public string? FileName { get; set; }
-        public string? TxtFileName { get; set; }
+        public string? FileName1 { get; set; }
+        public string? FileName2 { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
 
-        public virtual Team Team { get; set; } = new Team();
+        public virtual TeamDTO Team { get; set; } = new TeamDTO();
+
+
+        /* for view */
+        public string DateTimeString { get; set; }
+        public string PatientDOBString { get; set; }
+
 
     }
 }

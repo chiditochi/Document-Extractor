@@ -8,6 +8,6 @@ public class UploadConfirmationRequest
         
     }
 
-    public long PatientId { get; set; }
+    public long PatientTempId { get; set; }
     public bool Status { get; set; }
 }

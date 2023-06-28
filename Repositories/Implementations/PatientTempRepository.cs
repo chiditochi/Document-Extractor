@@ -9,17 +9,17 @@ using Microsoft.EntityFrameworkCore;
 namespace Document_Extractor.Repositories.Implementation;
 
 
-public class PatientRepository : IPatientRepository
+public class PatientTempRepository : IPatientTempRepository
 {
     private readonly AppDbContext _context;
-    public PatientRepository(
+    public PatientTempRepository(
         AppDbContext context
         )
     {
         _context = context;
     }
 
-    public async Task<Patient> Create(Patient item)
+    public async Task<PatientTemp> Create(PatientTemp item)
     {
         _context.Entry(item).State = EntityState.Added;
         await _context.SaveChangesAsync();
@@ -27,43 +27,43 @@ public class PatientRepository : IPatientRepository
         return item;
     }
 
-    public async Task<IEnumerable<Patient>> CreateMany(IEnumerable<Patient> items)
+    public async Task<IEnumerable<PatientTemp>> CreateMany(IEnumerable<PatientTemp> items)
     {
-        _context.Patients.AddRange(items);
+        _context.PatientTemps.AddRange(items);
         await _context.SaveChangesAsync();
         return items;
     }
 
     public async Task<bool> Delete(long itemId)
     {
-        var Patient = await GetOne(itemId);
-        if (Patient == null) throw new Exception($"Error fetching Patient with id ={itemId}");
+        var PatientTemp = await GetOne(itemId);
+        if (PatientTemp == null) throw new Exception($"Error fetching PatientTemp with id ={itemId}");
 
-        _context.Entry(Patient).State = EntityState.Deleted;
+        _context.Entry(PatientTemp).State = EntityState.Deleted;
         await _context.SaveChangesAsync();
 
         return true;
 
     }
 
-    public async Task<IEnumerable<Patient>> GetAll()
+    public async Task<IEnumerable<PatientTemp>> GetAll()
     {
-        var result = await _context.Patients.Include(x => x.Team).OrderByDescending(x => x.CreatedAt).ToListAsync();
+        var result = await _context.PatientTemps.Include(x => x.Team).OrderByDescending(x => x.CreatedAt).ToListAsync();
         return result;
     }
 
-    public async Task<Patient> GetOne(long itemId)
+    public async Task<PatientTemp> GetOne(long itemId)
     {
-        var result = await _context.Patients.FirstOrDefaultAsync(x => x.PatientId == itemId);
+        var result = await _context.PatientTemps.FirstOrDefaultAsync(x => x.PatientTempId == itemId);
         return result;
     }
 
-    public async Task<bool> Update(Patient item, long itemId)
+    public async Task<bool> Update(PatientTemp item, long itemId)
     {
-        var Patient = await GetOne(itemId);
-        if (Patient == null) throw new Exception($"Error fetching Patient with id ={itemId}");
+        var PatientTemp = await GetOne(itemId);
+        if (PatientTemp == null) throw new Exception($"Error fetching PatientTemp with id ={itemId}");
 
-        _context.Entry(Patient).State = EntityState.Modified;
+        _context.Entry(PatientTemp).State = EntityState.Modified;
         await _context.SaveChangesAsync();
 
         return true;
@@ -75,8 +75,7 @@ public class PatientRepository : IPatientRepository
 
         try
         {
-            //var query = $"select * from dbo.Patients where IsUploadComfirmed = 1 and Status = 1";
-            var query = $"select * from dbo.Patients where";
+            var query = $"select * from dbo.PatientTemps where IsUploadComfirmed = 1 and Status = 1";
             var propKeys = props.Keys.ToList();
             var formatPropKeys = propsAndFormat.Keys.ToList();
 
@@ -84,7 +83,7 @@ public class PatientRepository : IPatientRepository
             var notDatetimeProps = props.Where(x => !formatPropKeys.Contains(x.Key)).ToList();
 
             var queryFilter = string.Empty;
-            //if (notDatetimeProps.Count > 0) query += " and";
+            if (notDatetimeProps.Count > 0) query += " and";
             foreach (var itemProp in notDatetimeProps)
             {
                 var propKey = itemProp.Key;
@@ -95,10 +94,10 @@ public class PatientRepository : IPatientRepository
 
             query += queryFilter;
 
-            var uploadedDocs = await _context.Patients.FromSqlRaw(query).ToListAsync();
+            var uploadedDocs = await _context.PatientTemps.FromSqlRaw(query).ToListAsync();
             if (uploadedDocs.Any())
             {
-                var resultDocs = new List<Patient>();
+                var resultDocs = new List<PatientTemp>();
                 foreach (var item in datetimeProps)
                 {
                     var dKey = item.Key;
@@ -146,19 +145,19 @@ public class PatientRepository : IPatientRepository
 
     }
 
-    // public async Task<AppResult<bool>> ConfirmUpload(long patientId, bool status)
+    // public async Task<AppResult<bool>> ConfirmUpload(long patientTempId, bool status)
     // {
     //     var result = new AppResult<bool>();
     //     try
     //     {
-    //         var dbPatient = await GetOne(patientId);
-    //         if (dbPatient == null) throw new Exception($"Error fetching Patient with id = {patientId}");
+    //         var dbPatient = await GetOne(patientTempId);
+    //         if (dbPatient == null) throw new Exception($"Error fetching PatientTemp with id = {patientTempId}");
 
     //         dbPatient.UpdatedAt = DateTime.Now;
     //         dbPatient.IsUploadComfirmed = true;
     //         dbPatient.Status = status;
 
-    //         var r = await Update(dbPatient, dbPatient.PatientId);
+    //         var r = await Update(dbPatient, dbPatient.PatientTempId);
 
     //         result.Status = true;
     //         result.Data.Add(r);
@@ -174,8 +173,5 @@ public class PatientRepository : IPatientRepository
     // }
 
 
-
-
-    
 
 }

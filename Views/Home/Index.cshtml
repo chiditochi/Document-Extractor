@@ -114,6 +114,12 @@
 
                 evt.preventDefault();
 
+                var isValid = isFormDataValid();
+                if(!isValid){
+                    appJS.displayError({ message: `Select a Team and Required file extensions are: <li>.docx</li><li>.pdf</li>`, title: messageLabel });
+                    return;
+                }
+
                 var formData = getFormData();
                 appJS.printFormData(formData);
                 var options = appJS.makeApiCallDefaultOption();
@@ -148,7 +154,30 @@
                 result.append('teamId', teamId);
 
                 return result;
+            }
 
+            function isFormDataValid(){
+                var result = true;
+
+                const validExt = ['docx', 'pdf'];
+
+                var doc = docFile[0].files[0];
+                if(doc === undefined){
+                    result = false;
+                    return;
+                }
+
+                var ext = doc.name.split('.').pop();
+                if (validExt.indexOf(ext.toLowerCase()) == -1) {
+                    result = false;
+                }
+
+                if(result){
+                    var teamId = teamSelect.children("option:selected").val();
+                    if(teamId === '0' || teamId === null) result = false;
+                }
+
+                return result;
             }
 
             async function populateDialog(data){
@@ -198,8 +227,8 @@
                 $(".app-dialog").show();
                 $(".app-dialog")[0].showModal();
 
-                $('.confirm').data("id", data.patientId);
-                $('.reject').data("id", data.patientId); 
+                $('.confirm').data("id", data.patientTempId);
+                $('.reject').data("id", data.patientTempId); 
 
             }
 
@@ -213,11 +242,11 @@
             }
 
 
-            async function UploadConfirmation(patientId, status){
+            async function UploadConfirmation(patientTempId, status){
                 messageLabel = "Upload Confirmation";
                 var options = appJS.makeApiCallDefaultOption();
                 options.method = "POST";
-                options.body = JSON.stringify({ patientId, status });
+                options.body = JSON.stringify({ patientTempId, status });
 
                 await appJS.setSpinnerPromise(true);
                 var res = await appJS.makeApiCall(`/Upload/Confirmation`, options);
@@ -230,7 +259,7 @@
                     appJS.displaySuccess({ message: res.data.message, title: messageLabel });
                     setTimeout(function(){
                         location.reload();
-                    }, 1000)
+                    }, 5000)
                     //await autoLoad();
                 }
                 else appJS.displayError({ message: res.data.message, title: messageLabel });

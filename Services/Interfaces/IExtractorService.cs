@@ -6,5 +6,5 @@ namespace Document_Extractor.Services.Interfaces;
 
 public interface IExtractorService
 {
-    public Task<AppResult<PatientDTO>> ProcessUpload(UploadRequest formData);
+    public Task<AppResult<PatientTempDTO>> ProcessUpload(UploadRequest formData);
 }

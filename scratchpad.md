@@ -33,17 +33,31 @@ libman uninstall <LIBRARY> [--verbosity]
   - dotnet ef migrations script AddNewTables AddAuditTable
 
 ### Todos 
-    - login
-        - form 
-        - logic action 
-        - Session package 
-        - AD package 
-    - logout
-        - logic action
-    - extracted data:
-        - format date | 27 June 2023 10:30  as dd MMM yyyy HH:mm (done)
-    - Notification:
-        - make stay longer (done)
+    - Table 
+        - create PatientTemp Table 
+        - from Patient model, remove 
+            - IsUploadComfirmed
+            - Status
+    - create a permanent tempfolder 
+        - wwwroot/tempFolder
+        - aid, add this to the folders automatically profiled during startup 
+    - User Action Trigger
+        - on Confirmation 
+                - copy record to Patient table from PatientTemp table 
+                - copy associated files PatientTemp.FileName & PatientTemp.TxtFileName to the configured folders 
+        - on Rejection
+                - do Cleanup
+        - Cleanup
+            - remove wwwroot/tempFolder files , aid is the target record 
+            - remove db record for that upload 
+    - Upload form validation 
+        - add file validation
+            - accept .pdf and .docx 
+        - check 
+    
+        if (ext == ".docx") result = new WordExtractor();
+        if (ext == ".pdf") result = new PdfExtractor();
+
 
     - cleanup cancelled uploads 
         - from db 

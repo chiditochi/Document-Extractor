@@ -23,6 +23,7 @@ public class ExtractorService : IExtractorService
     private readonly IPatientRepository _patientRepository;
     private readonly IMapper _mapper;
     private readonly IWebHostEnvironment _wenv;
+    private readonly IPatientTempRepository _patientTempRepository;
 
     public ExtractorService(
         ILogger<ExtractorService> logger,
@@ -32,7 +33,8 @@ public class ExtractorService : IExtractorService
         ITeamRepository teamRepository,
         IPatientRepository patientRepository,
         IMapper mapper,
-        IWebHostEnvironment wenv
+        IWebHostEnvironment wenv,
+        IPatientTempRepository patientTempRepository
     )
     {
         _logger = logger;
@@ -43,13 +45,14 @@ public class ExtractorService : IExtractorService
         _patientRepository = patientRepository;
         _mapper = mapper;
         _wenv = wenv;
+        _patientTempRepository = patientTempRepository;
 
 
     }
 
-    public async Task<AppResult<PatientDTO>> ProcessUpload(UploadRequest formData)
+    public async Task<AppResult<PatientTempDTO>> ProcessUpload(UploadRequest formData)
     {
-        var result = new AppResult<PatientDTO>();
+        var result = new AppResult<PatientTempDTO>();
 
         var filePath = string.Empty;
         var textPath = string.Empty;
@@ -85,21 +88,21 @@ public class ExtractorService : IExtractorService
             //append Team Details to txtfile 
             var appendResult = await AppendTeamDetailsToTxtData(textPath, formData!.TeamId);
             //copy txt file to Uploads folder 
-            var copyFileResult = await CopyTxtFileToUploadsFolder(textPath);
+            //var copyFileResult = await CopyTxtFileToUploadsFolder(textPath);
 
             var extractModel = fileModelResult.Data.First();
             var validationResult = await ValidateFileModel(extractModel);
             if (!validationResult.Status) throw new Exception(validationResult.Message);
 
             //persist data 
-            var patientDTO = await StoreUploadPatient(formData!.TeamId, filePath, textPath, extractModel);
+            var patientTempDTO = await StoreUploadPatient(formData!.TeamId, filePath, textPath, extractModel);
 
             var viewDateTimeFormat = _config.GetSection("App:ViewDateTimeFormat").Value;
-            patientDTO.DateTimeString = patientDTO.DateTime.ToString(viewDateTimeFormat);
-            patientDTO.PatientDOBString = patientDTO.PatientDOB.ToString(viewDateTimeFormat);
+            patientTempDTO.DateTimeString = patientTempDTO.DateTime.ToString(viewDateTimeFormat);
+            patientTempDTO.PatientDOBString = patientTempDTO.PatientDOB.ToString(viewDateTimeFormat);
 
             result.Status = true;
-            result.Data.Add(patientDTO);
+            result.Data.Add(patientTempDTO);
 
 
         }
@@ -115,21 +118,19 @@ public class ExtractorService : IExtractorService
 
     }
 
-    private async Task<PatientDTO> StoreUploadPatient(long teamId, string filePath, string textPath, ExtractResult extractModel)
+    private async Task<PatientTempDTO> StoreUploadPatient(long teamId, string filePath, string textPath, ExtractResult extractModel)
     {
         ExtractDTO model = extractModel.Data;
-        var patient = _mapper.Map<ExtractDTO, Patient>(model);
+        var patient = _mapper.Map<ExtractDTO, PatientTemp>(model);
         patient.CreatedAt = DateTime.Now;
         patient.UpdatedAt = DateTime.Now;
         patient.TeamId = teamId;
         patient.FileName = filePath;
         patient.TxtFileName = textPath;
-        patient.IsUploadComfirmed = false;
-        patient.Status = false;
 
-        var dbPatient = await _patientRepository.Create(patient);
-        if (dbPatient == null) throw new Exception($"Error creating Patient");
-        var resultDTO = _mapper.Map<Patient, PatientDTO>(dbPatient);
+        var dbPatientTemp = await _patientTempRepository.Create(patient);
+        if (dbPatientTemp == null) throw new Exception($"Error creating Patient");
+        var resultDTO = _mapper.Map<PatientTempDTO>(dbPatientTemp);
         return resultDTO;
     }
 
@@ -144,7 +145,7 @@ public class ExtractorService : IExtractorService
         var result = new AppResult<string>();
         try
         {
-            var storageLocation = _config.GetSection("App:Uploads:UserUploads").Value;
+            var storageLocation = _config.GetSection("App:TempUploads").Value;
             storageLocation = string.Join(Path.DirectorySeparatorChar, storageLocation.Split("/"));
             if (string.IsNullOrEmpty(storageLocation)) throw new Exception($"No Upload Location configured!");
             var fileNameWithPath = Path.Combine(_wenv.WebRootPath, storageLocation, DateTimeOffset.Now.ToUnixTimeSeconds() + "_" + doc.FileName);
@@ -174,7 +175,7 @@ public class ExtractorService : IExtractorService
             IExtractor? extractor = GetExtractorFactory(filePath);
             if (extractor == null) throw new Exception($"Error fetching Extractor instance");
 
-            var targetFilePath = _config.GetSection("App:Uploads:txtUploads").Value;
+            var targetFilePath = _config.GetSection("App:TempUploads").Value;
             targetFilePath = string.Join(Path.DirectorySeparatorChar, targetFilePath.Split("/"));
             if (string.IsNullOrEmpty(targetFilePath)) throw new Exception();
 
@@ -487,7 +488,7 @@ public class ExtractorService : IExtractorService
 
             var uploadExistResult = await _patientRepository.DoesUploadExist(modelPropsDict, propsAndFormat);
             if (!uploadExistResult.Status) throw new Exception(uploadExistResult.Message);
-            if (uploadExistResult.Data.First()) throw new Exception($"This form has been uploaded before!");
+            if (uploadExistResult.Data.First()) throw new Exception($"This document has been uploaded before!");
 
         }
     }

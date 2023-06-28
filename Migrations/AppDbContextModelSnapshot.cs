@@ -203,8 +203,119 @@ namespace Document_Extractor.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsUploadComfirmed")
-                        .HasColumnType("bit");
+                    b.Property<string>("OperatorFirstname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OperatorMiddle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OperatorSurname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientAddress1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientAddress2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientAddress3")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientAddress4")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PatientDOB")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PatientEthnicity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientFirstname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientGPCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientGPFirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientGPSurname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientGPTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientHousename")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientMiddle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientNHS")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientPhoneno")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientPostcode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientPractice")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientPracticeAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientPracticeCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientReligion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientSex")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientSexCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientSurname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("TeamId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TxtFileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PatientId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Patients");
+                });
+
+            modelBuilder.Entity("Document_Extractor.Models.DB.PatientTemp", b =>
+                {
+                    b.Property<long>("PatientTempId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PatientTempId"), 1L, 1);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OperatorFirstname")
                         .HasColumnType("nvarchar(max)");
@@ -287,9 +398,6 @@ namespace Document_Extractor.Migrations
                     b.Property<string>("PatientTitle")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
                     b.Property<long>("TeamId")
                         .HasColumnType("bigint");
 
@@ -299,11 +407,11 @@ namespace Document_Extractor.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("PatientId");
+                    b.HasKey("PatientTempId");
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("Patients");
+                    b.ToTable("PatientTemps");
                 });
 
             modelBuilder.Entity("Document_Extractor.Models.DB.Team", b =>
@@ -476,6 +584,17 @@ namespace Document_Extractor.Migrations
                 });
 
             modelBuilder.Entity("Document_Extractor.Models.DB.Patient", b =>
+                {
+                    b.HasOne("Document_Extractor.Models.DB.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Document_Extractor.Models.DB.PatientTemp", b =>
                 {
                     b.HasOne("Document_Extractor.Models.DB.Team", "Team")
                         .WithMany()

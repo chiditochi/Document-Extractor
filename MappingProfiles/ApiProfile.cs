@@ -12,7 +12,9 @@ public class AppMappingProfile : Profile
         CreateMap<AppUser, AppUserDTO>().ReverseMap();
         CreateMap<AppRole, AppRoleDTO>().ReverseMap();
         CreateMap<Patient, PatientDTO>().ReverseMap();
-        CreateMap<Patient, ExtractDTO>().ReverseMap();
+        CreateMap<Patient, PatientTemp>().ReverseMap();
+        CreateMap<PatientTemp, PatientTempDTO>().ReverseMap();
+        CreateMap<PatientTemp, ExtractDTO>().ReverseMap();
         CreateMap<Team, TeamDTO>().ReverseMap();
         CreateMap<AppConstant, AppConstantDTO>().ReverseMap();
         CreateMap<UserType, UserTypeDTO>().ReverseMap();

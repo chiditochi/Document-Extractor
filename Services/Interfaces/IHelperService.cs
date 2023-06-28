@@ -10,8 +10,9 @@ public interface IHelperService
     public Task<bool> DeleteFiles(string[] filePaths);
     public List<string> GetModelStateErrors(ModelStateDictionary modelState);
     public Task<bool> CreateFolder(string filePath);
-
-
+    public Task<bool> CleanupTempUploadFiles(string fileName, string txtFileName);
+    public Task<bool> CopyFilesToConfiguredFolders(string fileName, string txtFileName, List<string> convertedFileNames);
+    public Task<List<string>> GetTempFileConversion(string fileName, string txtFileName);
 
 
     public Task<bool> CreateUploadFolders();

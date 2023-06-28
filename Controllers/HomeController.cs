@@ -149,7 +149,7 @@ public class HomeController : Controller
     [HttpPost("/UploadPost")]
     public async Task<IActionResult> UploadPost([FromForm] UploadRequest formData)
     {
-        var result = new AppResult<PatientDTO>();
+        var result = new AppResult<PatientTempDTO>();
         try
         {
             if (!ModelState.IsValid)
@@ -174,7 +174,8 @@ public class HomeController : Controller
     [HttpPost("/Upload/Confirmation")]
     public async Task<IActionResult> UploadConfirmation([FromBody] UploadConfirmationRequest payload)
     {
-        var result = await _patientService.ConfirmUploadedPatient(payload.PatientId, payload.Status);
+        //var result = await _patientService.ConfirmUploadedPatient(payload.PatientId, payload.Status);
+        var result = await _patientService.ConfirmUpload(payload.PatientTempId, payload.Status);
         return Json(new { Data = result });
     }
 

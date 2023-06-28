@@ -73,6 +73,7 @@ builder.Services.AddControllersWithViews();
 //add Repositories
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IPatientTempRepository, PatientTempRepository>();
 builder.Services.AddScoped<IAppUserRepository<AppUser>, AppUserRepository>();
 // builder.Services.AddScoped<IAppRoleRepository<AppRole>, AppRoleRepository>();
 builder.Services.AddScoped<IAppConstantRepository, AppConstantRepository>();

@@ -12,6 +12,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, long>
 
     public virtual DbSet<Team> Teams { get; set; } = null!;
     public virtual DbSet<Patient> Patients { get; set; } = null!;
+    public virtual DbSet<PatientTemp> PatientTemps { get; set; } = null!;
     public virtual DbSet<AppConstant> AppConstants { get; set; } = null!;
     public virtual DbSet<UserType> UserTypes { get; set; } = null!;
 }
