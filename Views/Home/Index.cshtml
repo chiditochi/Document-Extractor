@@ -115,8 +115,8 @@
                 evt.preventDefault();
 
                 var isValid = isFormDataValid();
-                if(!isValid){
-                    appJS.displayError({ message: `Select a Team and Required file extensions are: <li>.docx</li><li>.pdf</li>`, title: messageLabel });
+                if(!isValid.status){
+                    appJS.displayError({ message: isValid.message, title: messageLabel });
                     return;
                 }
 
@@ -157,24 +157,29 @@
             }
 
             function isFormDataValid(){
-                var result = true;
+                var result = { status: true, message: ''};
 
                 const validExt = ['docx', 'pdf'];
 
                 var doc = docFile[0].files[0];
                 if(doc === undefined){
-                    result = false;
-                    return;
+                    result.status = false;
+                    result.message = `Please provide a ${validExt[0]} or a ${validExt[1]} document`;
+                    return result;
                 }
 
                 var ext = doc.name.split('.').pop();
                 if (validExt.indexOf(ext.toLowerCase()) == -1) {
-                    result = false;
+                    result.status = false;
+                    result.message = `Please provide a ${validExt[0]} or a ${validExt[1]} document`;
                 }
 
                 if(result){
                     var teamId = teamSelect.children("option:selected").val();
-                    if(teamId === '0' || teamId === null) result = false;
+                    if(teamId === '0' || teamId === null) {
+                        result.status = false;
+                        result.message = `Please select a valid Team`;
+                    }
                 }
 
                 return result;
