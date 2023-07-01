@@ -104,10 +104,9 @@ public class HomeController : Controller
         try
         {
             if (!ModelState.IsValid) throw new Exception($"Email and Password is Required!");
-            //var user = await _userManager.FindByEmailAsync(login.Email);
-            var user = await _appUserRepository.GetByEmail(login.Email);
+            var user = await _appUserRepository.GetByEmailForLogin(login.Email);
             if (user == null || !user!.IsActive) throw new Exception($"User not Found or is InActive");
-            var r = await _signInManger.PasswordSignInAsync(user!, login.Password, false, true);
+            var r = await _signInManger.PasswordSignInAsync(user, login.Password, false, true);
             if (!r.Succeeded) throw new Exception($"Wrong login details provided!");
 
             //create Session 

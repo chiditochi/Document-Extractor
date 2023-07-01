@@ -53,6 +53,13 @@ public class AppUserRepository : IAppUserRepository<AppUser>
                                 .AsNoTracking().FirstOrDefaultAsync(x => x.Email == email);
         return item;
     }
+    public async Task<AppUser> GetByEmailForLogin(string email)
+    {
+        var item = await _context.Users
+                                .Include(x => x.UserType)
+                                .FirstOrDefaultAsync(x => x.Email == email);
+        return item;
+    }
 
 
 
