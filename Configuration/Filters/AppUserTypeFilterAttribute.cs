@@ -14,19 +14,19 @@ public class AppUserTypeFilterAttribute : Attribute, IActionFilter
         var currentUserType = context.HttpContext.Session.GetString("usertype");
         if (currentUserType is null)
         {
-            context.Result = new RedirectResult("/Login");
+            context.Result = new RedirectResult("/Home/Login");
             return;
         }
         if (currentUserType != _userType)
         {
             if (currentUserType != "OpTeam")
             {
-                context.Result = new RedirectResult("/");
+                context.Result = new RedirectResult("/Home/");
                 return;
             }
             else
             {
-                context.Result = new RedirectResult("/Upload");
+                context.Result = new RedirectResult("/Home/Upload");
                 return;
 
             }

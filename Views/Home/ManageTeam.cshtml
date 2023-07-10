@@ -108,9 +108,13 @@
                     }
 
                     var options = appJS.makeApiCallDefaultOption();
+                    var teamId = formData.teamId;
+                    var addUrl = '@Url.Action("Team", "Home")';
+                    var updateUrl = '@Url.Action("Team", "Home")/' + teamId; 
                     options.method = "POST";
                     options.body = JSON.stringify(formData);
-                    const url = isAdd ? "/Team" : `/Team/${formData.teamId}`;
+                    //const url = isAdd ? `/Team` : `/Team/${teamId}`;
+                    const url = isAdd ? addUrl : updateUrl;
 
                     await appJS.setSpinnerPromise(true);
                     var res = await appJS.makeApiCall(url, options);
@@ -141,7 +145,8 @@
 
                         var options = appJS.makeApiCallDefaultOption();
                         await appJS.setSpinnerPromise(true);
-                        var res = await appJS.makeApiCall(`/Teams`, options);
+                        var url = '@Url.Action("Teams", "Home")';
+                        var res = await appJS.makeApiCall(url, options);
 
                         appJS.setSpinnerPromise(false, 1000);
                         if(res.data.status){

@@ -9,7 +9,7 @@ public class AppAuthorizeAttribute : Attribute, IAuthorizationFilter
         var userName = context.HttpContext.Session.GetString("username");
         if(userName is null)
         {
-            context.Result = new RedirectResult("/Login");
+            context.Result = new RedirectResult("/Home/Login");
         }
         else
         {

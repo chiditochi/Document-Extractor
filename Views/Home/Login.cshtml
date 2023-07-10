@@ -30,76 +30,75 @@
 
 
 @section Scripts {
-                            <script type="text/javascript">
-                                $(document).ready(async function () {
-                                    /*
+        <script type="text/javascript">
+            $(document).ready(async function () {
+                /*
 
-                                    */
+                */
 
-                                    /* Declarations */
-                                    let messageLabel = "";
-                                    const datetimeVars = ["dateTime", "patientDOB"];
+                /* Declarations */
+                let messageLabel = "";
+                const datetimeVars = ["dateTime", "patientDOB"];
 
-                                    const loginForm = $("#form-login");
-                                    const loginBtn = loginForm.find("#login-btn");
-                                    const userEmailInput = loginForm.find("#user-email");
-                                    const passwordInput = loginForm.find("#user-password");
-
-
-                                    /* Actions */
-                                    loginBtn.click(async function(evt){
-                                        evt.preventDefault();
-
-                                        messageLabel = "User Login";
-
-                                        var formValues =  getFormValues();
-                                        var isValid = validateFormValues(formValues);
-                                        if(!isValid){
-                                            appJS.displayError({ message: `Please provide an Email and Password!`, title: messageLabel });
-                                            return;
-                                        }
+                const loginForm = $("#form-login");
+                const loginBtn = loginForm.find("#login-btn");
+                const userEmailInput = loginForm.find("#user-email");
+                const passwordInput = loginForm.find("#user-password");
 
 
-                                        var options = appJS.makeApiCallDefaultOption();
-                                        options.method = "POST";
-                                        options.body = JSON.stringify(formValues);
+                /* Actions */
+                loginBtn.click(async function(evt){
+                    evt.preventDefault();
 
-        @* appJS.displaySuccess({ message: JSON.stringify(formValues, null, 4), title: messageLabel });
-                    return; *@
+                    messageLabel = "User Login";
 
-                                        await appJS.setSpinnerPromise(true);
-                                        var res = await appJS.makeApiCall(`/Login`, options);
+                    var formValues =  getFormValues();
+                    var isValid = validateFormValues(formValues);
+                    if(!isValid){
+                        appJS.displayError({ message: `Please provide an Email and Password!`, title: messageLabel });
+                        return;
+                    }
 
-                                        appJS.setSpinnerPromise(false, 1000);
-                                        if(res.data.status){
-                                            //console.log({ d: res.data.data[0] });
-                                            appJS.displaySuccess({ message: res.data.message, title: messageLabel });
-                                            const redirectLocation = `${location.origin}/`;
-                                            appJS.appRedirect(redirectLocation);
-                                        }
-                                        else appJS.displayError({ message: res.data.message, title: messageLabel }); 
 
-                                    })
+                    var options = appJS.makeApiCallDefaultOption();
+                    options.method = "POST";
+                    options.body = JSON.stringify(formValues);
 
-                                    /* implementations */
 
-                                    function getFormValues(){
-                                        const result = { email: '', password: '' };
-                                        result.email = userEmailInput.val();
-                                        result.password = passwordInput.val();
-                                        return result;
-                                    }
+                    await appJS.setSpinnerPromise(true);
+                    let url = '@Url.Action("Login", "Home")';
+                    var res = await appJS.makeApiCall(url, options);
 
-                                    function validateFormValues(dataValues){
-                                        console.log({ validationData: dataValues });
-                                        var result = false;
-                                        if( dataValues.email && dataValues.email.trim() !== "" && dataValues.password && dataValues.password.trim() !== "" ){
-                                            result = true;
-                                        }
+                    appJS.setSpinnerPromise(false, 1000);
+                    if(res.data.status){
+                        //console.log({ d: res.data.data[0] });
+                        appJS.displaySuccess({ message: res.data.message, title: messageLabel });
+                        const redirectLocation = `${location.origin}/`;
+                        appJS.appRedirect(redirectLocation);
+                    }
+                    else appJS.displayError({ message: res.data.message, title: messageLabel }); 
 
-                                        return result;
-                                    }
+                })
 
-                                });
-                            </script>
+                /* implementations */
+
+                function getFormValues(){
+                    const result = { email: '', password: '' };
+                    result.email = userEmailInput.val();
+                    result.password = passwordInput.val();
+                    return result;
+                }
+
+                function validateFormValues(dataValues){
+                    console.log({ validationData: dataValues });
+                    var result = false;
+                    if( dataValues.email && dataValues.email.trim() !== "" && dataValues.password && dataValues.password.trim() !== "" ){
+                        result = true;
+                    }
+
+                    return result;
+                }
+
+            });
+        </script>
 }

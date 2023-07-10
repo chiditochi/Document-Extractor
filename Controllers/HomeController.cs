@@ -11,7 +11,6 @@ using Document_Extractor.Repositories.Interfaces;
 
 namespace Document_Extractor.Controllers;
 
-
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -49,6 +48,7 @@ public class HomeController : Controller
     }
 
     [HttpGet("/")]
+    [HttpGet("/Home/")]
     [AppAuthorize]
     [AppUserTypeFilter("Patient")]
     public IActionResult Index()
@@ -64,14 +64,14 @@ public class HomeController : Controller
     }
 
 
-    [HttpGet("/Login")]
+    [HttpGet("/Home/Login")]
     [AllowAnonymous]
     public IActionResult Login()
     {
         return View();
     }
 
-    [HttpGet("/Logout")]
+    [HttpGet("/Home/Logout")]
     [AppAuthorize]
     public async Task<IActionResult> Logout()
     {
@@ -95,7 +95,7 @@ public class HomeController : Controller
 
     }
 
-    [HttpPost("/Login")]
+    [HttpPost("/Home/Login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginDTO login)
     {
@@ -129,7 +129,7 @@ public class HomeController : Controller
         return Json(new { Data = result });
     }
 
-    [HttpGet("/Upload")]
+    [HttpGet("/Home/Upload")]
     [AppAuthorize]
     public async Task<IActionResult> Upload()
     {
@@ -137,7 +137,7 @@ public class HomeController : Controller
         return View();
     }
 
-    [HttpGet("/UploadData")]
+    [HttpGet("/Home/UploadData")]
     [AppAuthorize]
     public async Task<IActionResult> UploadData()
     {
@@ -145,7 +145,7 @@ public class HomeController : Controller
         return Json(new { Data = result });
     }
 
-    [HttpPost("/UploadPost")]
+    [HttpPost("/Home/UploadPost")]
     public async Task<IActionResult> UploadPost([FromForm] UploadRequest formData)
     {
         var result = new AppResult<PatientTempDTO>();
@@ -170,7 +170,7 @@ public class HomeController : Controller
     }
 
 
-    [HttpPost("/Upload/Confirmation")]
+    [HttpPost("/Home/UploadConfirmation")]
     public async Task<IActionResult> UploadConfirmation([FromBody] UploadConfirmationRequest payload)
     {
         //var result = await _patientService.ConfirmUploadedPatient(payload.PatientId, payload.Status);
@@ -178,7 +178,7 @@ public class HomeController : Controller
         return Json(new { Data = result });
     }
 
-    [HttpGet("/ManageTeam")]
+    [HttpGet("/Home/ManageTeam")]
     [AppAuthorize]
     [AppUserTypeFilter("OpTeam")]
     public IActionResult ManageTeam()
@@ -186,7 +186,7 @@ public class HomeController : Controller
         return View();
     }
 
-    [HttpGet("/Teams")]
+    [HttpGet("/Home/Teams")]
     [AppAuthorize]
     public async Task<IActionResult> Teams()
     {
@@ -194,7 +194,7 @@ public class HomeController : Controller
         return Json(new { Data = result });
     }
 
-    [HttpPost("/Team")]
+    [HttpPost("/Home/Team")]
     [AppUserTypeFilter("OpTeam")]
     public async Task<IActionResult> AddTeam([FromBody] TeamDTO payload)
     {
@@ -219,7 +219,7 @@ public class HomeController : Controller
         return Json(new { Data = result });
     }
 
-    [HttpPost("/Team/{TeamId:long}")]
+    [HttpPost("/Home/Team/{TeamId:long}")]
     [AppUserTypeFilter("OpTeam")]
     public async Task<IActionResult> UpdateTeam([FromBody] TeamDTO payload)
     {

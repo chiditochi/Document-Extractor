@@ -44,7 +44,8 @@
 
                     var options = appJS.makeApiCallDefaultOption();
                     await appJS.setSpinnerPromise(true);
-                    var res = await appJS.makeApiCall(`/UploadData`, options);
+                    var url = '@Url.Action("UploadData", "Home")';
+                    var res = await appJS.makeApiCall(url, options);
 
                     appJS.setSpinnerPromise(false, 1000);
                     if(res.data.status){

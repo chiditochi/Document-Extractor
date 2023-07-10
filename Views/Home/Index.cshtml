@@ -85,7 +85,8 @@
 
                 var options = appJS.makeApiCallDefaultOption();
                 await appJS.setSpinnerPromise(true);
-                var res = await appJS.makeApiCall(`/Teams`, options);
+                var url = '@Url.Action("Teams", "Home")';
+                var res = await appJS.makeApiCall(url, options);
 
                 appJS.setSpinnerPromise(false, 1000);
                 if(res.data.status){
@@ -130,7 +131,8 @@
 
 
                 await appJS.setSpinnerPromise(true);
-                var res = await appJS.makeApiCall(`/UploadPost`, options);
+                var url = '@Url.Action("UploadPost", "Home")';
+                var res = await appJS.makeApiCall(url, options);
 
                 appJS.setSpinnerPromise(false, 5000);
                 if(res.data.status){
@@ -254,7 +256,8 @@
                 options.body = JSON.stringify({ patientTempId, status });
 
                 await appJS.setSpinnerPromise(true);
-                var res = await appJS.makeApiCall(`/Upload/Confirmation`, options);
+                var url = '@Url.Action("UploadConfirmation", "Home")';
+                var res = await appJS.makeApiCall(url, options);
 
                appJS.setSpinnerPromise(false, 5000);
                $('.app-dialog').attr("open", false);
