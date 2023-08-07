@@ -22,7 +22,7 @@
             </form>
         </div>
     </div>
-    <dialog class="app-dialog row w-100">
+    <dialog class="app-dialog" id="app-dialog">
         <div class="row">
             <div class="row justify-content-md-center gap-3">
                 <button class="bg-danger btn btn-danger w-25 reject">Reject</button>
@@ -96,14 +96,11 @@
                     const defaultOption = "Select a Team"; 
                     $(selector).empty();                   
                     appJS.populateSelect(dataChoices, selector, defaultOption);
-                    //await populateDialog();
-                    $(".app-dialog")[0].close();
-                    $(".app-dialog").hide();
+                    $("#app-dialog")[0].close();
                 }
                 else {
                      appJS.displayError({ message: `Error ${messageLabel}`, title: messageLabel }); 
-                    $(".app-dialog")[0].close();
-                    $(".app-dialog").hide();
+                    $("#app-dialog")[0].close();
 
                 }
 
@@ -137,12 +134,15 @@
                 appJS.setSpinnerPromise(false, 5000);
                 if(res.data.status){
                     //console.log({ d: res.data.data[0] });
-                    //appJS.displaySuccess({ message: res.data.message, title: messageLabel });
-                    appJS.resetForm('.form');
+                    //appJS.resetForm('.form');
+                    resetUploadFile();
                     const patientData = res.data.data[0];
                     await populateDialog(patientData)
                 }
-                else appJS.displayError({ message: res.data.message, title: messageLabel }); 
+                else {
+                    resetUploadFile();
+                    appJS.displayError({ message: res.data.message, title: messageLabel }); 
+                }
                
             });
 
@@ -231,8 +231,7 @@
                 });
 
                 $('.payload').html(dataHtml);
-                $(".app-dialog").show();
-                $(".app-dialog")[0].showModal();
+                $("#app-dialog")[0].showModal();
 
                 $('.confirm').data("id", data.patientTempId);
                 $('.reject').data("id", data.patientTempId); 
@@ -260,23 +259,21 @@
                 var res = await appJS.makeApiCall(url, options);
 
                appJS.setSpinnerPromise(false, 5000);
-               $('.app-dialog').attr("open", false);
-               $('.app-dialog').hide();
+               $('#app-dialog')[0].close();
 
                 if(res.data.status){
                     appJS.displaySuccess({ message: res.data.message, title: messageLabel });
-                    setTimeout(function(){
-                        location.reload();
-                    }, 5000)
-                    //await autoLoad();
+                    resetUploadFile();
                 }
-                else appJS.displayError({ message: res.data.message, title: messageLabel });
+                else{
+                    appJS.displayError({ message: res.data.message, title: messageLabel });
+                }
 
             }
           
-
-
-
+            function resetUploadFile(){
+                $('.form .doc').val('');
+            }
 
         });
     </script>

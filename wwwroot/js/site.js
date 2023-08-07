@@ -30,6 +30,8 @@ const appJS = {
         choice.label +
         "</option>";
     }
+
+    $(selectSelector).empty();
     $(selectSelector).append(selectHTML);
   },
   setSpinner: function (display) {

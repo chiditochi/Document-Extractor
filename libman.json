@@ -7,7 +7,8 @@
       "destination": "wwwroot/lib/toastr",
       "files": [
         "toastr.min.js",
-        "toastr.min.css"
+        "toastr.min.css",
+        "toastr.js.map"
       ]
     },
     {
