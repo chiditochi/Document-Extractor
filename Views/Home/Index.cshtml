@@ -115,6 +115,7 @@
                 var isValid = isFormDataValid();
                 if(!isValid.status){
                     appJS.displayError({ message: isValid.message, title: messageLabel });
+                    resetUploadFile();
                     return;
                 }
 
